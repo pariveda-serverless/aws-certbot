@@ -1,0 +1,41 @@
+version:  0.1
+
+phases:
+  install:
+    commands:
+
+      # Install additional npm modules
+      - npm install
+
+      # Install jq
+      - apt-get update && apt-get install -y jq
+
+  pre_build:
+    commands:
+      # Get Configuration Information
+      - chmod +x getConfig.sh && ./getConfig.sh
+
+      # Uncomment/modify secret management code below as needed.
+      # The commands assume you have uploaded files to the dedicated bucket.
+      # For instructions on updating secrets, see https://github.com/pariveda-serverless/support/blob/master/secrets-uploader/README.md
+      # To see an example of client-side encryption/decryption, view the commands at https://github.com/pariveda-serverless/child-pipelines/blob/master/buildspec.yml
+
+      # TODO determine if you need secret management, and modify accordingly
+      - aws configure set s3.signature_version s3v4
+      - echo Secrets bucket is $(cat s3.txt)
+
+      # TODO: If needed, add additional steps
+      # EXAMPLE: npm lint, npm test, etc.
+  build:
+    commands:
+      # Deploy Application
+      - serverless deploy
+
+  post_build:
+    commands:
+      # Remove S3 Bucket Name from Codebuild Memory
+      - rm -rf s3.txt
+
+      # Remove pipelines
+      # USE WITH EXTREME CAUTION!
+      #- sls remove
