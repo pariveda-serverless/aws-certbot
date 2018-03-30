@@ -48,40 +48,45 @@ function processEvent(event, context, callback) {
         } else {
             var slackInfo = JSON.parse(response.body);
             console.log('slack info', slackInfo);
-            docs.put({
-                TableName: process.env.ACTIVITIES_TABLE,
-                Item : {
-                    timestamp: "" + new Date().getTime().toString(),
-                    userName: inputParams.user_name,
-                    name: slackInfo.profile.real_name,
-                    // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
-                    // office: slackInfo.profile.fields.Xf1LTXNG6P.value, // Office
-                    date: getActivityDate(),
-                    contact: contact,
-                    company: company,
-                    event: event,
-                    rawText: inputParams.text
-                }
-            }, function(err, data) {
-                if (err) {
-                    callback(err + " " + body.timestamp, null);
-                }
-                else {
-                    var successMessage = {
-                        "response_type": "in_channel",
-                        "text": "Success!"
-                        + "\n*Fin*: " + slackInfo.profile.real_name
-                        + "\n*Contact*: " + certid,
-                    };
-                    console.log('great success: ' + JSON.stringify(successMessage));
-                    var response = {
-                        statusCode: 200,
-                        body: JSON.stringify(successMessage)
-                    };
-                    callback(null, response);
-                }
-            });
-        }
+            var response = {
+                            statusCode: 200,
+                            body: JSON.stringify("yay")
+                        };
+                        callback(null, response);
+            // docs.put({
+            //     TableName: process.env.ACTIVITIES_TABLE,
+            //     Item : {
+            //         timestamp: "" + new Date().getTime().toString(),
+            //         userName: inputParams.user_name,
+            //         name: slackInfo.profile.real_name,
+            //         // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
+            //         // office: slackInfo.profile.fields.Xf1LTXNG6P.value, // Office
+            //         date: getActivityDate(),
+            //         contact: contact,
+            //         company: company,
+            //         event: event,
+            //         rawText: inputParams.text
+            //     }
+            // }, function(err, data) {
+            //     if (err) {
+            //         callback(err + " " + body.timestamp, null);
+            //     }
+            //     else {
+            //         var successMessage = {
+            //             "response_type": "in_channel",
+            //             "text": "Success!"
+            //             + "\n*Fin*: " + slackInfo.profile.real_name
+            //             + "\n*Contact*: " + certid,
+            //         };
+            //         console.log('great success: ' + JSON.stringify(successMessage));
+            //         var response = {
+            //             statusCode: 200,
+            //             body: JSON.stringify(successMessage)
+            //         };
+            //         callback(null, response);
+            //     }
+            // });
+        } // end else
     });
 }
 
