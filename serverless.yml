@@ -30,14 +30,16 @@ provider:
 functions:
   hello:
     environment:
+      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: index.hello
+    handler: index.handler
     events:
       - http:
           path: hello/world
-          method: get
+          method: post
+          cors: true
 
 #    EXAMPLE: API Gateway Protocol=http, Path=users/create, Method=get
 #    events:

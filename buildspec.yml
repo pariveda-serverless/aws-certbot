@@ -24,18 +24,25 @@ phases:
       - aws configure set s3.signature_version s3v4
       - echo Secrets bucket is $(cat s3.txt)
 
+      # For environment var SLACK_APP_AUTH_TOKEN in serverless.yml (OAuth Access Token https://api.slack.com/apps/A9ZA995GF/oauth?success=1)
+      - aws s3api get-object --bucket $(cat s3.txt) --key oauth.enc oauth.txt
+      # For environment var VERIFICATION_TOKEN in serverless.yml
+      #- aws s3api get-object --bucket $(cat s3.txt) --key token.enc token.txt
+      # For environment var SLACK_BOT_AUTH_TOKEN in serverless.yml
+      #- aws s3api get-object --bucket $(cat s3.txt) --key bot_oauth.enc bot_oauth.txt
+
       # TODO: If needed, add additional steps
       # EXAMPLE: npm lint, npm test, etc.
   build:
     commands:
       # Deploy Application
-      - serverless deploy
+      - serverless deploy --clientSecret "$(cat oauth.txt)"
 
   post_build:
     commands:
       # Remove S3 Bucket Name from Codebuild Memory
       - rm -rf s3.txt
-
+      - rm -rf oauth.txt
       # Remove pipelines
       # USE WITH EXTREME CAUTION!
       #- sls remove
