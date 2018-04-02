@@ -36,7 +36,7 @@ phases:
   build:
     commands:
       # Deploy Application
-      - serverless deploy --clientSecret "$(cat oauth.txt)"
+      - serverless deploy --clientSecret "$(cat oauth.txt)" --slackToken "$(cat token.txt)"
 
   post_build:
     commands:
