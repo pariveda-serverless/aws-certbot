@@ -1,10 +1,11 @@
 const AWS = require('aws-sdk');
 const docs = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
-const token = process.env['VERIFICATION_TOKEN'];
 const qs = require('querystring');
 const req = require('request');
 
 const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
+// See https://api.slack.com/docs/token-types#verification
+const token = process.env['VERIFICATION_TOKEN'];
 
 function getActivityDate() {
     var dateObj = new Date();
@@ -90,6 +91,6 @@ function processEvent(event, context, callback) {
     });
 }
 
-exports.handler = (event, context, callback) => {
+module.exports.hello = (event, context, callback) => {
     processEvent(event, context, callback);
 };
