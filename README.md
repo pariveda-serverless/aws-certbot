@@ -41,15 +41,15 @@ A Slack bot for recording AWS certifications you've earned.
     
     If you see something like 'Done - file saved to: aws-certbot-security-master-secretsbucket-b39999jbnza8/oauth.enc!' you are good to move on.
 
-- Follow the same process for uploading the 'Verification Token' at (the shared secret that tells your app the incoming request is really from Slack), naming the file 'verification_token.txt'. 
+- Follow the same process for uploading the 'Verification Token' at (the shared secret that tells your app the incoming request is really from Slack), naming the file 'token.txt'. 
 
   You'll find it at https://api.slack.com/apps/A9ZA995GF/general?
   
   ``` 
-  
+  echo -n "8xxxxxxxxxxxxxxxxxx" > ~/secrets/token.txt
+  ~/src/support/secrets-uploader $ docker-compose run --rm secrets
+  ./upload.sh -service aws-certbot -stage master -path /var/secrets/token.txt -s3key token.enc
   ```
-
-
 
 - Create a 'bot user' at https://api.slack.com/apps/A9ZA995GF/bots?. The 
 

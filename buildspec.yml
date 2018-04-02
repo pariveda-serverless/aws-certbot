@@ -27,7 +27,7 @@ phases:
       # For environment var SLACK_APP_AUTH_TOKEN in serverless.yml (OAuth Access Token https://api.slack.com/apps/A9ZA995GF/oauth?success=1)
       - aws s3api get-object --bucket $(cat s3.txt) --key oauth.enc oauth.txt
       # For environment var VERIFICATION_TOKEN in serverless.yml
-      #- aws s3api get-object --bucket $(cat s3.txt) --key token.enc token.txt
+      - aws s3api get-object --bucket $(cat s3.txt) --key token.enc token.txt
       # For environment var SLACK_BOT_AUTH_TOKEN in serverless.yml
       #- aws s3api get-object --bucket $(cat s3.txt) --key bot_oauth.enc bot_oauth.txt
 
@@ -43,6 +43,7 @@ phases:
       # Remove S3 Bucket Name from Codebuild Memory
       - rm -rf s3.txt
       - rm -rf oauth.txt
+      - rm -rf token.txt
       # Remove pipelines
       # USE WITH EXTREME CAUTION!
       #- sls remove
