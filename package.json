@@ -10,7 +10,10 @@
   "dependencies": {
     "lambda-log-wrapper": "*",
     "lambda-log-timer": "*",
-    "aws-sdk": "latest"
+    "aws-sdk": "latest",
+    "querystring": "^0.2.0",
+    "request": "^2.81.0",
+    "json2csv": "^3.7.3"
   },
   "devDependencies": {
     "serverless-offline": "^3.1.0"
