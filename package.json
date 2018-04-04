@@ -8,12 +8,16 @@
   "author": "Jack Warner",
   "license": "UNLICENSED",
   "dependencies": {
-    "lambda-log-wrapper": "*",
-    "lambda-log-timer": "*",
     "aws-sdk": "latest",
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "curlrequest": "^1.0.1",
+    "json2csv": "^3.7.3",
+    "lambda-log-timer": "*",
+    "lambda-log-wrapper": "*",
+    "moment": "^2.22.0",
     "querystring": "^0.2.0",
-    "request": "^2.81.0",
-    "json2csv": "^3.7.3"
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "serverless-offline": "^3.1.0"

@@ -14,7 +14,9 @@ A Slack bot for recording AWS certifications you've earned.
     ``` 
     
 - You have a Slack development workspace
+
 - You've created a new app at https://api.slack.com/apps?new_app=1 in that development workspace
+
 - You've created a slash command at https://api.slack.com/apps/A9ZA995GF/slash-commands? (where 'A9ZA995GF' corresponds to the link for your development workspace)
 
 - Enter The following values will work (append the function name to the API Gateway URL above):
@@ -26,6 +28,7 @@ A Slack bot for recording AWS certifications you've earned.
     Usage Hint: [Validation Number]
     ```
 - At 'Oauth & Permissions' click 'Install App to Workspace' (https://api.slack.com/apps/A9ZA995GF/oauth?)
+
 - Save the value in ~/secrets/oauth.txt
     
     ``` 
@@ -50,6 +53,16 @@ A Slack bot for recording AWS certifications you've earned.
   ~/src/support/secrets-uploader $ docker-compose run --rm secrets
   ./upload.sh -service aws-certbot -stage master -path /var/secrets/token.txt -s3key token.enc
   ```
+
+- Add users.profile.read permissions at https://api.slack.com/apps/A9ZA995GF/oauth?
+
+    ``` 
+    Access user’s profile and workspace profile fields
+    ------------------
+    users.profile:read
+    ```
+
+    
 
 - Create a 'bot user' at https://api.slack.com/apps/A9ZA995GF/bots?. The 
 
