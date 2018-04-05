@@ -7,6 +7,7 @@ function extractListingsFromHTML (html) {
     let notFound = $('.pmError').text();
     console.log('length is' + notFound.length);
     if (notFound.length > 0) {
+        //notFound = notFound.slice(1,-1);
         let response = {
             found: found,
             message: notFound
@@ -15,7 +16,6 @@ function extractListingsFromHTML (html) {
         return response;
     }
     else {
-        found = true;
         console.log("not found is " + notFound);
         let name = $('#contentText fieldset h1').text();
         let awsCert = $('#contentText fieldset h2').text();
@@ -44,7 +44,8 @@ function extractListingsFromHTML (html) {
             status: certStatus,
             starts: starts,
             expires: ends,
-            found: found
+            found: true,
+            message: "Your " + awsCert + " is logged, safe and sound. Great work!"
         }
         console.log(JSON.stringify(certObject));
         return certObject;

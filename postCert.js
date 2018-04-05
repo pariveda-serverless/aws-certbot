@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const docs = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
+const docs = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 const qs = require('querystring');
 const req = require('request');
 const zlib = require('zlib');
@@ -10,7 +10,7 @@ const token = process.env['VERIFICATION_TOKEN'];
 
 const request = require('axios');
 const {extractListingsFromHTML} = require('./helpers');
-const curl = require( 'curlrequest' );
+const curl = require('curlrequest');
 
 var instance = request.create({
     baseURL: certificationUrl,
@@ -41,26 +41,27 @@ function getActivityDate() {
     var timestamp = month + "/" + day + "/" + year;
     return timestamp;
 }
+
 function getGzipped(data, callback) {
     // buffer to store the streamed decompression
     var buffer = [];
 
     //http.get(url, function(res) {
-        // pipe the response into the gunzip to decompress
-        var gunzip = zlib.createGunzip();
-        //res.pipe(gunzip);
+    // pipe the response into the gunzip to decompress
+    var gunzip = zlib.createGunzip();
+    //res.pipe(gunzip);
 
-        gunzip.on('data', function(data) {
-            // decompression chunk ready, add it to the buffer
-            buffer.push(data.toString())
+    gunzip.on('data', function (data) {
+        // decompression chunk ready, add it to the buffer
+        buffer.push(data.toString())
 
-        }).on("end", function() {
-            // response and decompression complete, join the buffer and return
-            callback(null, buffer.join(""));
+    }).on("end", function () {
+        // response and decompression complete, join the buffer and return
+        callback(null, buffer.join(""));
 
-        }).on("error", function(e) {
-            callback(e);
-        });
+    }).on("error", function (e) {
+        callback(e);
+    });
 }
 
 
@@ -103,8 +104,8 @@ function processEvent(event, context, callback) {
             user: slackUserId,
             include_labels: false
         }
-    }, function(error, response, body) {
-        if(error){
+    }, function (error, response, body) {
+        if (error) {
             callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
         } else {
             var options = {
@@ -126,27 +127,42 @@ function processEvent(event, context, callback) {
                     'referer': 'https://aw.certmetrics.com/amazon/public/verification.aspx'
                 },
                 data: {
-                        __EVENTTARGET: '',
-                        __EVENTARGUMENT: '',
-                        DES_Group: '',
-                        __VIEWSTATE: 'GEBk/+fJ7AipPgdAICQWwRh7lJkkTGg8S9NEJ5skJ+EqEA1wMLwi5++L/+dJIyA8IxfcqGv77gwp6zIodEdymggeAXc+N2RHLTEIfKthbuOWZme8sx6YszdvqLywWf9qi3pHStzyyFt1X0kIzXXNnrznCYPutvd/wfSw8NoRgOV5WgxGdla4zJF/G09r8k+7LHDoDNW3BSN8ruJKIKgoIkbQregMX906duR4kh5w7QUlcxfe7eMe/uN21db+Utsj/rp5lzQoWmCDMIrx3xG9VbHTlaY0EJP61Eh4Y48fP09tCTkX0qajmYlsg9zR3MawBLoT9ydqEiT5it5Wi9sRlTzL3cO6bIKfVl38KlBseo4s+3s3vWKdUM3R7eeFdKBXgCaWDZtbC9ZjbRotSoBoS/KnyJP73ilEibhlVpM90oxwnqubDZqj79gaQchcWH24Ef0EVMAqDOKaatczUNyRtA2nZCPEBGrYH1Fa3BDqhxdeAX93izHQXpGpX7oTx7NhOzWgz8utg8o7sDaXm9iWif+OkiOV6aN3+kPCuV8rz+1FXcP46cZdI04NUQ4jBV5+9kBLYLAg9hwCHwc7AwZ/CGT+xA7+Vl/CE2kmUFMuUOxcV8QwmlcN5lbs+4Lxd1JwNvOFWIh79nJzZ2aHQWwuaKAcNKUb4O3/vk4A5l3pMMl+l4ysCoOIrttUWGxJBCqjWLvoXeW9i3CZzUfZFocUhwNilxChnrDoYrcyo2lA6yqmShuAKK56wj56Ikts0/XsYaxLHfzqtbUnS3pxKMOrEqkzn4tdBvGl+4/ES+CJrd2SJXOHGIcth8n5L48BAXQu+xkiLuim4WM+DyBr6ZtigATMTPtdKTrNKE2PT/HIQkbPPQCrpGzM6BtEDgyujT8bj2xuAOQwppidH57RmW2ZWat9sJM5/speRekh08EP932W++Vg0+FGs3wPqLVW1nbOSlP12QCPKLZbOK40JD3qfmHSE171QhzO/7+gijUDqnauKS2/oeoaYZBjgavnADT+4M61LSnAmmGJGd4aBJrEr1stA/F7hoSSwNq5Mp+edgNp2CyFvSUI6IJUHE5lDmCLZ20F0w8ZHqsktDcswxUy+Y8aJyZxs3wwETfAJ1qrga55V3w5/CeOvvC1XZj2SWvNv5qSmcnGJM2ztMiILigmbuTITQJtRvCOlZ0QukhidYqCaOzen8ku7nvmQAGoMStAuQeISf0dg0lUV9mIAQ3eMK6bzE4wa64KS68gdyp3xY/Unduo',
-                        __VIEWSTATEGENERATOR: 'DDE86476',
-                        __VIEWSTATEENCRYPTED: '',
-                        __EVENTVALIDATION: 'kq0Xp1G59bjbKG3EV0s7mXxAP7zd777kEKA3q1QzzCqoNwyqc+7h/K1lotjERLnDshJECKQXicR1wrVoF0Vib0AyO83LWOCtfE4UFwBUyQ3bRzw4H4wNzxSsX05bwheSM3q0B9jsSgfFPHeRPQlc6fl071szcGpQoguUZmTKBrLhT7tRjPRttXOdGgx1/7OWEqlUMyPDKElYYrp39ejmUtfibfU=',
-                        ctl00$mainContent$txtVerificationCode: certid,
-                        ctl00$ctl02$cbxCulture: '/amazon/public/verification.aspx?language=en',
-                        ctl00$mainContent$btnSubmit: 'Submit'
+                    __EVENTTARGET: '',
+                    __EVENTARGUMENT: '',
+                    DES_Group: '',
+                    __VIEWSTATE: 'GEBk/+fJ7AipPgdAICQWwRh7lJkkTGg8S9NEJ5skJ+EqEA1wMLwi5++L/+dJIyA8IxfcqGv77gwp6zIodEdymggeAXc+N2RHLTEIfKthbuOWZme8sx6YszdvqLywWf9qi3pHStzyyFt1X0kIzXXNnrznCYPutvd/wfSw8NoRgOV5WgxGdla4zJF/G09r8k+7LHDoDNW3BSN8ruJKIKgoIkbQregMX906duR4kh5w7QUlcxfe7eMe/uN21db+Utsj/rp5lzQoWmCDMIrx3xG9VbHTlaY0EJP61Eh4Y48fP09tCTkX0qajmYlsg9zR3MawBLoT9ydqEiT5it5Wi9sRlTzL3cO6bIKfVl38KlBseo4s+3s3vWKdUM3R7eeFdKBXgCaWDZtbC9ZjbRotSoBoS/KnyJP73ilEibhlVpM90oxwnqubDZqj79gaQchcWH24Ef0EVMAqDOKaatczUNyRtA2nZCPEBGrYH1Fa3BDqhxdeAX93izHQXpGpX7oTx7NhOzWgz8utg8o7sDaXm9iWif+OkiOV6aN3+kPCuV8rz+1FXcP46cZdI04NUQ4jBV5+9kBLYLAg9hwCHwc7AwZ/CGT+xA7+Vl/CE2kmUFMuUOxcV8QwmlcN5lbs+4Lxd1JwNvOFWIh79nJzZ2aHQWwuaKAcNKUb4O3/vk4A5l3pMMl+l4ysCoOIrttUWGxJBCqjWLvoXeW9i3CZzUfZFocUhwNilxChnrDoYrcyo2lA6yqmShuAKK56wj56Ikts0/XsYaxLHfzqtbUnS3pxKMOrEqkzn4tdBvGl+4/ES+CJrd2SJXOHGIcth8n5L48BAXQu+xkiLuim4WM+DyBr6ZtigATMTPtdKTrNKE2PT/HIQkbPPQCrpGzM6BtEDgyujT8bj2xuAOQwppidH57RmW2ZWat9sJM5/speRekh08EP932W++Vg0+FGs3wPqLVW1nbOSlP12QCPKLZbOK40JD3qfmHSE171QhzO/7+gijUDqnauKS2/oeoaYZBjgavnADT+4M61LSnAmmGJGd4aBJrEr1stA/F7hoSSwNq5Mp+edgNp2CyFvSUI6IJUHE5lDmCLZ20F0w8ZHqsktDcswxUy+Y8aJyZxs3wwETfAJ1qrga55V3w5/CeOvvC1XZj2SWvNv5qSmcnGJM2ztMiILigmbuTITQJtRvCOlZ0QukhidYqCaOzen8ku7nvmQAGoMStAuQeISf0dg0lUV9mIAQ3eMK6bzE4wa64KS68gdyp3xY/Unduo',
+                    __VIEWSTATEGENERATOR: 'DDE86476',
+                    __VIEWSTATEENCRYPTED: '',
+                    __EVENTVALIDATION: 'kq0Xp1G59bjbKG3EV0s7mXxAP7zd777kEKA3q1QzzCqoNwyqc+7h/K1lotjERLnDshJECKQXicR1wrVoF0Vib0AyO83LWOCtfE4UFwBUyQ3bRzw4H4wNzxSsX05bwheSM3q0B9jsSgfFPHeRPQlc6fl071szcGpQoguUZmTKBrLhT7tRjPRttXOdGgx1/7OWEqlUMyPDKElYYrp39ejmUtfibfU=',
+                    ctl00$mainContent$txtVerificationCode: certid,
+                    ctl00$ctl02$cbxCulture: '/amazon/public/verification.aspx?language=en',
+                    ctl00$mainContent$btnSubmit: 'Submit'
                 },
-                include: false };
+                include: false
+            };
 
             curl.request(options, function (err, parts) {
                 //zlib.createUnzip()
-                extractListingsFromHTML(parts);
+                //console.log(parts);
+                let response = extractListingsFromHTML(parts);
+
+                var successMessage = {
+                    "response_type": "in_channel",
+                    "text": response.message
+                };
+
+                var slack = {
+                    statusCode: 200,
+                    body: JSON.stringify(successMessage)
+                };
+                callback(null, slack);
+                // console.log(response);
             });
 
         } // end else
     });
 }
+
 exports.handler = (event, context, callback) => {
     processEvent(event, context, callback);
 };
