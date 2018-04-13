@@ -2,3 +2,5 @@ node_modules
 .idea
 test
 *.sh
+# Serverless framework puts deployment artifacts here:
+.serverless

@@ -48,18 +48,16 @@ function processEvent(event, context, callback) {
             context.fail(err);
         } else {
             // tell slack we're good :)
-            console.log('got here');
-            context.succeed('Lambda_B said '+ data.Payload);
-            var doingWorkMessage = {
-                statusCode: 200,
-                body: JSON.stringify(checkingAWSMessage)
-            };
-            callback(null, doingWorkMessage);
-
+            console.log('Lambda_B said '+ data.Payload);
+            //context.succeed();
         }
     });
 
-
+    var doingWorkMessage = {
+        statusCode: 200,
+        body: JSON.stringify(checkingAWSMessage)
+    };
+    callback(null, doingWorkMessage)
 
 }
 
