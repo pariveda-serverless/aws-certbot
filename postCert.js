@@ -86,6 +86,9 @@ function processEvent(event, context, callback) {
     var inputParams = qs.parse(event.body);
     var requestToken = inputParams.token;
     var slackUserId = inputParams.user_id;
+    const responseUrl = inputParams.response_url;
+    console.log('response url: ' + responseUrl);
+
 
     if (requestToken != token) {
         console.error("Request token (" + requestToken + ") does not match expected token for Slack");
@@ -160,13 +163,20 @@ function processEvent(event, context, callback) {
                     "response_type": "in_channel",
                     "text": response.message
                 };
-
                 var slack = {
                     statusCode: 200,
                     body: JSON.stringify(successMessage)
                 };
-                callback(null, slack);
-                // console.log(response);
+                req.post(responseUrl, {
+                    slack
+                }, function (error, response, body) {
+                    if (error) {
+                        callback("Unable to send message to Slack - " + error, null);
+                    } else {
+                        console.log("hooray!");
+                        callback(null, slack);
+                    }
+                });
             });
 
         } // end else

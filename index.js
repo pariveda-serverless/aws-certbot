@@ -19,7 +19,7 @@ function getActivityDate() {
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
 
-    var inputParams = qs.parse(event.body);
+    const inputParams = qs.parse(event.body);
     var requestToken = inputParams.token;
     var slackUserId = inputParams.user_id;
 
@@ -47,6 +47,7 @@ function processEvent(event, context, callback) {
         if(error){
             callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
         } else {
+            console.log(response);
             var slackInfo = JSON.parse(response.body);
             console.log('slack info', slackInfo);
             var response = {
