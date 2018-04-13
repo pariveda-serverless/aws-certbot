@@ -42,40 +42,20 @@ function getActivityDate() {
     return timestamp;
 }
 
-function getGzipped(data, callback) {
-    // buffer to store the streamed decompression
-    var buffer = [];
 
-    //http.get(url, function(res) {
-    // pipe the response into the gunzip to decompress
-    var gunzip = zlib.createGunzip();
-    //res.pipe(gunzip);
-
-    gunzip.on('data', function (data) {
-        // decompression chunk ready, add it to the buffer
-        buffer.push(data.toString())
-
-    }).on("end", function () {
-        // response and decompression complete, join the buffer and return
-        callback(null, buffer.join(""));
-
-    }).on("error", function (e) {
-        callback(e);
-    });
-}
 
 
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
 
-    var inputParams = qs.parse(event.body);
-    var requestToken = inputParams.token;
-    var slackUserId = inputParams.user_id;
+    let inputParams = qs.parse(event.body);
+    let requestToken = inputParams.token;
+    let slackUserId = inputParams.user_id;
     const responseUrl = inputParams.response_url;
     console.log('response url: ' + responseUrl);
 
 
-    if (requestToken != token) {
+    if (requestToken !== token) {
         console.error("Request token (" + requestToken + ") does not match expected token for Slack");
         context.fail("Invalid request token");
     }
@@ -100,7 +80,7 @@ function processEvent(event, context, callback) {
             callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
         } else {
 
-            var options = {
+            let options = {
                 url: certificationUrl,
                 method: 'POST',
                 compressed: true,
@@ -132,32 +112,26 @@ function processEvent(event, context, callback) {
                 },
                 include: false
             };
-
             curl.request(options, function (err, parts) {
-                //zlib.createUnzip()
-                //console.log(parts);
                 let response = extractListingsFromHTML(parts);
-
-                var successMessage = {
-                    "response_type": "in_channel",
-                    "text": response.message
+                let options = {
+                    uri: responseUrl,
+                    method: 'POST',
+                    json: {
+                        "response_type": "in_channel",
+                        "text": response.message
+                    }
                 };
-                var slack = {
-                    statusCode: 200,
-                    body: JSON.stringify(successMessage)
-                };
-                req.post(responseUrl, {
-                    slack
-                }, function (error, response, body) {
-                    if (error) {
-                        callback("Unable to send message to Slack - " + error, null);
-                    } else {
-                        console.log("hooray!");
-                        callback(null, slack);
+                req(options, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        console.log("great success!") // Print the shortened url.
+                    }
+                    else {
+                        console.log("Error responding to slack at: " + responseUrl);
+                        console.log("Has the URL been used more than 5 times or is older than 30 minutes?");
                     }
                 });
             });
-
         } // end else
     });
 }
