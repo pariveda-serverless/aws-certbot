@@ -8,7 +8,7 @@ const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
 const checkingAWSMessage = {
-    "response_type": "in_channel",
+    "response_type": "ephemeral",
     "text": "Searching the Amazon jungle..."
 };
 const request = require('axios');

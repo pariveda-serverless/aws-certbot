@@ -50,6 +50,7 @@ functions:
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
     handler: postCert.handler
+    timeout: 60
     events:
       - http:
           path: cert
