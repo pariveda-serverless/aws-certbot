@@ -7,10 +7,7 @@ const certificationUrl = 'https://aw.certmetrics.com/amazon/public/verification.
 const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
-const checkingAWSMessage = {
-    "response_type": "ephemeral",
-    "text": "Searching the Amazon jungle..."
-};
+
 const request = require('axios');
 const {extractListingsFromHTML} = require('./helpers');
 const curl = require('curlrequest');
@@ -71,18 +68,6 @@ function getGzipped(data, callback) {
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
 
-    // curl.setHeaders([
-    //     'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
-    // ])
-    //     .get('https://www.google.com')
-    //     .then(({statusCode, body, headers}) => {
-    //         console.log('curl');
-    //         console.log(statusCode, body, headers);
-    //     })
-    //     .catch((e) => {
-    //         console.log(e);
-    //     });
-
     var inputParams = qs.parse(event.body);
     var requestToken = inputParams.token;
     var slackUserId = inputParams.user_id;
@@ -114,12 +99,6 @@ function processEvent(event, context, callback) {
         if (error) {
             callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
         } else {
-
-            var doingWorkMessage = {
-                statusCode: 200,
-                body: JSON.stringify(checkingAWSMessage)
-            };
-            callback(null, doingWorkMessage);
 
             var options = {
                 url: certificationUrl,

@@ -33,7 +33,7 @@ function processEvent(event, context, callback) {
         FunctionName: 'aws-certbot-master-postCert', // the lambda function we are going to invoke
         InvocationType: 'RequestResponse',
         LogType: 'Tail',
-        Payload: JSON.stringify(event.body)
+        Payload: JSON.stringify(event)
     };
     console.log('params:' + JSON.stringify(params));
     var slackValues = inputParams.text.split('%2C');
@@ -42,8 +42,6 @@ function processEvent(event, context, callback) {
     var activityDate = new Date().toString();
     var certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     console.log('cert id is ' + certid);
-
-
 
     lambda.invoke(params, function(err, data) {
         if (err) {
