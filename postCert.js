@@ -7,7 +7,8 @@ const certificationUrl = 'https://aw.certmetrics.com/amazon/public/verification.
 const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
-
+const EPHEMERAL = "ephemeral";
+const CHANNEL = "in_channel";
 const request = require('axios');
 const {extractListingsFromHTML} = require('./helpers');
 const curl = require('curlrequest');
@@ -79,7 +80,7 @@ function processEvent(event, context, callback) {
         if (error) {
             callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
         } else {
-
+            // Nice and ugly info for the curl request, retrieved by running a real request in the browser
             let options = {
                 url: certificationUrl,
                 method: 'POST',
@@ -114,14 +115,19 @@ function processEvent(event, context, callback) {
             };
             curl.request(options, function (err, parts) {
                 let response = extractListingsFromHTML(parts);
+                let responseType = CHANNEL;
+                if (response.found === false) {
+                    responseType = EPHEMERAL;
+                }
                 let options = {
                     uri: responseUrl,
                     method: 'POST',
                     json: {
-                        "response_type": "in_channel",
+                        "response_type": responseType,
                         "text": response.message
                     }
                 };
+                console.log(JSON.stringify(options));
                 req(options, function (error, response, body) {
                     if (!error && response.statusCode === 200) {
                         console.log("great success!") // Print the shortened url.
