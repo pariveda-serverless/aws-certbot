@@ -31,7 +31,7 @@ function processEvent(event, context, callback) {
 
     var params = {
         FunctionName: 'aws-certbot-master-postCert', // the lambda function we are going to invoke
-        InvocationType: 'RequestResponse',
+        InvocationType: 'Event', // 'Event' is async, RequestResponse is synchronous
         LogType: 'Tail',
         Payload: JSON.stringify(event)
     };
