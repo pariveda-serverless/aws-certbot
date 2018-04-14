@@ -2,51 +2,15 @@ const AWS = require('aws-sdk');
 const docs = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 const qs = require('querystring');
 const req = require('request');
-const zlib = require('zlib');
 const certificationUrl = 'https://aw.certmetrics.com/amazon/public/verification.aspx';
 const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
-//const TABLE = process.env['TABLE'];
-const TABLE = 'aws-certbot-master.master';
+const TABLE = process.env['TABLE'];
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
-const request = require('axios');
 const {extractListingsFromHTML} = require('./helpers');
 const curl = require('curlrequest');
-
-var instance = request.create({
-    baseURL: certificationUrl,
-    timeout: 1000,
-    method: 'post',
-    headers: {
-        'origin': 'https://aw.certmetrics.com',
-        'accept-encoding': 'gzip, deflate, br',
-        'accept-language': 'en-US,en;q=0.9',
-        'cookie': '_ga=GA1.2.737381459.1519052278; _gid=GA1.2.729271125.1522270667; ASP.NET_SessionId=mupoxmmfwpebg4h5yzmis0jk',
-        'pragma': 'no-cache',
-        'upgrade-insecure-requests': '1',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-        'content-type': 'application/x-www-form-urlencoded',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'cache-control': 'no-cache',
-        'authority': 'aw.certmetrics.com',
-        'referer': 'https://aw.certmetrics.com/amazon/public/verification.aspx'
-    }
-});
-
-
-function getActivityDate() {
-    var dateObj = new Date();
-    var month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
-    var day = ('0' + dateObj.getDate()).slice(-2);
-    var year = dateObj.getFullYear();
-    var timestamp = month + "/" + day + "/" + year;
-    return timestamp;
-}
-
-
-
 
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
@@ -63,11 +27,9 @@ function processEvent(event, context, callback) {
         context.fail("Invalid request token");
     }
 
-    var slackValues = inputParams.text.split('%2C');
-    slackValues = inputParams.text.split(',');
+    let slackValues = inputParams.text.split('%2C');
 
-    var activityDate = new Date().toString();
-    var certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
+    let certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     console.log('cert id is ' + certid);
     req.post("https://slack.com/api/users.profile.get", {
         auth: {
@@ -125,7 +87,6 @@ function processEvent(event, context, callback) {
                         if (response.found === false) {
                             responseType = EPHEMERAL;
                         }
-
                         let options = {
                             uri: responseUrl,
                             method: 'POST',

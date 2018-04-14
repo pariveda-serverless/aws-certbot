@@ -2,17 +2,15 @@ const AWS = require('aws-sdk');
 const docs = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 const qs = require('querystring');
-const req = require('request');
 const lambda = new AWS.Lambda();
-const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
-//const TABLE = process.env['TABLE'];
-const TABLE = 'aws-certbot-master.master';
+const TABLE = process.env['TABLE'];
+const SERVICE_AND_STAGE = process.env['PIPELINE'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
 const checkingAWSMessage = {
-    "response_type": "ephemeral",
+    "response_type": EPHEMERAL,
     "text": "Searching the Amazon jungle..."
 };
 
@@ -38,19 +36,17 @@ function processEvent(event, context, callback) {
     }
 
     let params = {
-        FunctionName: 'aws-certbot-master-postCert', // the lambda function we are going to invoke
+        FunctionName: SERVICE_AND_STAGE + '-postCert', // the lambda function we are going to invoke
         InvocationType: 'Event', // 'Event' is async, RequestResponse is synchronous
         LogType: 'Tail',
         Payload: JSON.stringify(event)
     };
     console.log('params:' + JSON.stringify(params));
-    var slackValues = inputParams.text.split('%2C');
-    slackValues = inputParams.text.split(',');
+    let slackValues = inputParams.text.split('%2C');
 
-    var activityDate = new Date().toString();
     var certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     console.log('cert id is ' + certid);
-
+    console.log('table is ' + TABLE);
     let ddbParams = {
         TableName: TABLE,
         Key: {
@@ -59,7 +55,7 @@ function processEvent(event, context, callback) {
         ProjectionExpression: 'cert,fin,cert_status,starts,expires'
     };
 
-// Call DynamoDB to read the item from the table
+    // Call DynamoDB to read the item from the table
     ddb.getItem(ddbParams, function(err, data) {
         if (err) {
             console.log("Error", err);
@@ -67,9 +63,15 @@ function processEvent(event, context, callback) {
             //console.log(data);
             if (!isEmptyObject(data)) {
                 console.log("Success", data.Item.cert.S);
+                let certDetails = data.Item.fin.S + '\'s ' + data.Item.cert.S + ' cert is already logged.\nIf you\'re hungry for data, try /aws-cert-data';
+                let alreadyLogged = {
+                    "response_type": EPHEMERAL,
+                    "text": certDetails
+                };
+
                 let doingWorkMessage = {
                     statusCode: 200,
-                    body: JSON.stringify(checkingAWSMessage)
+                    body: JSON.stringify(alreadyLogged)
                 };
                 callback(null, doingWorkMessage)
             }

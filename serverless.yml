@@ -7,27 +7,19 @@ plugins:
 custom:
   securityHash: ${file(./securityhash.txt)}
   appHash: ${file(./apphash.txt)}
+  table: ${env:PIPELINE}.${env:STAGE}
 
 provider:
   name: aws
   runtime: nodejs6.10
   stage: ${opt:stage, env:STAGE}
   environment:
-    ACTIVITIES_TABLE: { Ref: DynamoTable }
+    TABLE: ${self:custom.table}
   # NOTE: Codebuild passes the lambda role from the security stack to the serverless deploy command in the live CI/CD pipeline
   role: ${file(./rolearn.txt)}
   region: ${env:AWS_REGION}
   stackTags:
     Type: service
-
-# NOTE: You can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
 
 functions:
   hello:
@@ -58,15 +50,6 @@ functions:
           path: cert
           method: post
           cors: true
-#    EXAMPLE: API Gateway Protocol=http, Path=users/create, Method=get
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-
-#    EXAMPLE: Lambda Function environment variables
-#    environment:
-#      variable2: value2
 
 # TODO: If needed, add additional Lambda Function definitions here
 # EXAMPLE: a more complete Lambda Function definitions
@@ -93,7 +76,7 @@ resources:
     DynamoTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: '${env:PIPELINE}.${env:STAGE}'
+        TableName: '${self:custom.table}'
         AttributeDefinitions:
           - AttributeName: certKey
             AttributeType: S
@@ -103,23 +86,6 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-#    TODO: The DynamoTable definition below follows the naming conventions for data access that the security stack expects
-#    DynamoTable:
-#      Type: 'AWS::DynamoDB::Table'
-#      Properties:
-#        AttributeDefinitions:
-#          -
-#            AttributeName: id
-#            AttributeType: S
-#        KeySchema:
-#          -
-#            AttributeName: id
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        #Security stack must grant access to this TableName as named below (service.stage)
-#        TableName: '${env:PIPELINE}.${env:STAGE}'
 
   Outputs:
 

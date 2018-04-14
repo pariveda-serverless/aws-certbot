@@ -8,8 +8,6 @@ const DEVOPS_TRACK = "DevOps";
 const SA_TRACK = "Solutions Architect";
 const req = require('request');
 
-
-
 function nameToEmail(name) {
     return name.replace(" ", ".").toLowerCase() + "@parivedasolutions.com";
 }
@@ -18,7 +16,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
     const $ = cheerio.load(html);
     let found = false;
     let notFound = $('.pmError').text();
-    console.log('length is' + notFound.length);
+    //console.log('length is' + notFound.length);
     if (notFound.length > 0) {
         //notFound = notFound.slice(1,-1);
         let response = {
@@ -50,9 +48,9 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
             if (error) {
                 console.log("SLACK EMAIL RETRIEVAL ERROR - " + error);
             } else {
-                console.log(JSON.stringify(response.body));
+                // console.log(JSON.stringify(response.body));
                 let profile = JSON.parse(response.body);
-                console.log(JSON.stringify(profile));
+                // console.log(JSON.stringify(profile));
                 if (profile.ok) {
                     console.log("Looks like a Fin: " + profile.user.real_name);
                     let awsCert = $('#contentText fieldset h2').text();
@@ -71,9 +69,9 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                     let year = dateParts[2];
                     let day = dateParts[1];
                     let starts = moment(year + '-' + monthNumber + '-' + day, 'YYYY-MM-DD');
-                    console.log(starts);
+                    //console.log(starts);
                     var ends = starts.clone().add(2, 'year').subtract(1, 'day');
-                    console.log(ends);
+                    //console.log(ends);
 
 
 
@@ -89,6 +87,8 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                         level = ASSOCIATE_LEVEL;
                         track = "Both";
                     }
+                    // TODO - add remaining certs
+                    //else if (awsCert === "")
 
                     docs.put({
                         TableName: tableName,
@@ -97,6 +97,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                             timestamp: "" + new Date().getTime().toString(),
                             //userName: inputParams.user_name,
                             fin: name,
+                            email: likelyEmail,
                             slack_user_id_logged_by: slackUserId,
                             slack_user_id_earned_by: profile.user.id,
                             // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
