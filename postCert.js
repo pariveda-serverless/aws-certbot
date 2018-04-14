@@ -7,6 +7,8 @@ const certificationUrl = 'https://aw.certmetrics.com/amazon/public/verification.
 const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
+//const TABLE = process.env['TABLE'];
+const TABLE = 'aws-certbot-master.master';
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
 const request = require('axios');
@@ -114,29 +116,37 @@ function processEvent(event, context, callback) {
                 include: false
             };
             curl.request(options, function (err, parts) {
-                let response = extractListingsFromHTML(parts);
-                let responseType = CHANNEL;
-                if (response.found === false) {
-                    responseType = EPHEMERAL;
-                }
-                let options = {
-                    uri: responseUrl,
-                    method: 'POST',
-                    json: {
-                        "response_type": responseType,
-                        "text": response.message
-                    }
-                };
-                console.log(JSON.stringify(options));
-                req(options, function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
-                        console.log("great success!") // Print the shortened url.
-                    }
-                    else {
-                        console.log("Error responding to slack at: " + responseUrl);
-                        console.log("Has the URL been used more than 5 times or is older than 30 minutes?");
+                extractListingsFromHTML(parts, certid, slackUserId, TABLE, decryptedSlackAuthToken, function(err, response) {
+                    if (err) {
+                        console.log("Horrible error: " + err);
+                    } else {
+                        // extraction successful
+                        let responseType = CHANNEL;
+                        if (response.found === false) {
+                            responseType = EPHEMERAL;
+                        }
+
+                        let options = {
+                            uri: responseUrl,
+                            method: 'POST',
+                            json: {
+                                "response_type": responseType,
+                                "text": response.message
+                            }
+                        };
+                        console.log("Parse responds with: " + JSON.stringify(options));
+                        req(options, function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                console.log("great success!") // Print the shortened url.
+                            }
+                            else {
+                                console.log("Error responding to slack at: " + responseUrl);
+                                console.log("Has the URL been used more than 5 times or is older than 30 minutes?");
+                            }
+                        });
                     }
                 });
+
             });
         } // end else
     });
