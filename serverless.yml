@@ -15,6 +15,7 @@ provider:
   stage: ${opt:stage, env:STAGE}
   environment:
     TABLE: ${self:custom.table}
+    SERVICE_AND_STAGE: ${env:PIPELINE}
   # NOTE: Codebuild passes the lambda role from the security stack to the serverless deploy command in the live CI/CD pipeline
   role: ${file(./rolearn.txt)}
   region: ${env:AWS_REGION}

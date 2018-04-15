@@ -4,7 +4,7 @@ const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 const qs = require('querystring');
 const lambda = new AWS.Lambda();
 const TABLE = process.env['TABLE'];
-const SERVICE_AND_STAGE = process.env['PIPELINE'];
+const SERVICE_AND_STAGE = process.env['SERVICE_AND_STAGE'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
 const EPHEMERAL = "ephemeral";
