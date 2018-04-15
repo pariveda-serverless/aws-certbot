@@ -77,8 +77,15 @@ function processEvent(event, context, callback) {
                 },
                 include: false
             };
+            let badgeOptions = {
+                url: certid,
+                method: 'GET',
+            };
+            if (certid.toLowerCase().startsWith('https://')) {
+                options = badgeOptions;
+            }
             curl.request(options, function (err, parts) {
-                extractListingsFromHTML(parts, certid, slackUserId, TABLE, decryptedSlackAuthToken, function(err, response) {
+                extractListingsFromHTML(parts, certid, slackUserId, TABLE, decryptedSlackAuthToken, function (err, response) {
                     if (err) {
                         console.log("Horrible error: " + err);
                     } else {

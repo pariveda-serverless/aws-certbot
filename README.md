@@ -54,18 +54,25 @@ A Slack bot for recording AWS certifications you've earned.
   ./upload.sh -service aws-certbot -stage master -path /var/secrets/token.txt -s3key token.enc
   ```
 
-- Add users.profile.read permissions at https://api.slack.com/apps/A9ZA995GF/oauth?
+- Add the following permissions at https://api.slack.com/apps/A9ZA995GF/oauth?
 
     ``` 
     Access user’s profile and workspace profile fields
     ------------------
     users.profile:read
-    ```
-
     
-
-- Create a 'bot user' at https://api.slack.com/apps/A9ZA995GF/bots?. The 
-
+    Access your workspace’s profile information
+    ------------------
+    users:read
+    
+    View email addresses of people on this workspace
+    ------------------
+    users:read.email
+    
+    Upload and modify files as user
+    ------------------
+    files:write:user
+    ```
 
 - Use  to upload the fo
 

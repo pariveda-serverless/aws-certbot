@@ -52,18 +52,20 @@ functions:
           method: post
           cors: true
 
-# TODO: If needed, add additional Lambda Function definitions here
-# EXAMPLE: a more complete Lambda Function definitions
-# getDynamoDBCloudwatchMetrics:
-#   handler: get-dynamodb-cloudwatch-metrics/index.handler
-#   events:
-#     - schedule: rate(1 hour)
-#   package:
-#     include:
-#       - get-dynamodb-cloudwatch-metrics/**
-#   environment:
-#     CURRENT_TABLES_TABLE:
-#       Ref: CurrentTablesTable
+  getData:
+    environment:
+      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
+      VERIFICATION_TOKEN: ${opt:slackToken}
+      SECRETS_BUCKET: ${file(./s3.txt)}
+      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
+      APP_COMMIT_HASH: ${self:custom.appHash}
+    handler: getData.handler
+    timeout: 60
+    events:
+      - http:
+          path: awsCertData
+          method: post
+          cors: true
 
 resources:
   Resources:
