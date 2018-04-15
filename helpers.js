@@ -23,8 +23,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
             found: found,
             message: notFound
         };
-        console.log(response);
-        return response;
+        callback(null, response);
     }
     else {
         let certObject;
@@ -124,7 +123,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                 }
                 else {
                     certObject.found = false;
-                    certObject.message = "There doesn't seem to be a fin with email " + likelyEmail + ".\nIf you think this is a mistake, contact #aws-certbot-support";
+                    certObject.message = "Hmm, that's a valid '" + awsCert + "' cert for " + name + ".\nBut there doesn't seem to be a Fin with email " + likelyEmail + ".\nIf you think this is a mistake, contact #aws-certbot-support";
                     console.log("Not a Fin: " + likelyEmail);
                     callback(null, certObject);
 

@@ -9,7 +9,7 @@ const SERVICE_AND_STAGE = process.env['SERVICE_AND_STAGE'];
 const token = process.env['VERIFICATION_TOKEN'];
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
-const checkingAWSMessage = {
+let checkingAWSMessage = {
     "response_type": EPHEMERAL,
     "text": "Searching the Amazon jungle..."
 };
@@ -44,9 +44,8 @@ function processEvent(event, context, callback) {
     console.log('params:' + JSON.stringify(params));
     let slackValues = inputParams.text.split('%2C');
 
-    var certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
-    console.log('cert id is ' + certid);
-    console.log('table is ' + TABLE);
+    let certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
+
     let ddbParams = {
         TableName: TABLE,
         Key: {
@@ -83,6 +82,7 @@ function processEvent(event, context, callback) {
                     }
                 });
                 // this will fire first so we don't see a slack timeout
+                checkingAWSMessage.text = "Searching the Amazon jungle for cert with id '" + certid + "'...";
                 let doingWorkMessage = {
                     statusCode: 200,
                     body: JSON.stringify(checkingAWSMessage)
