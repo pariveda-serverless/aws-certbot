@@ -13,7 +13,7 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 
 function nameToEmail(name) {
     let cleanName = name.replace(".",""); // no periods in names
-    return cleanName.replace(" ", ".").toLowerCase() + "@parivedasolutions.com";
+    return cleanName.replace(/ /gi, ".").toLowerCase() + "@parivedasolutions.com";
 }
 function extractPublicBadge(html) {
     const $p = cheerio.load(html);
