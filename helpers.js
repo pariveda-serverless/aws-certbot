@@ -12,7 +12,8 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 
 function nameToEmail(name) {
-    return name.replace(" ", ".").toLowerCase() + "@parivedasolutions.com";
+    let cleanName = name.replace(".",""); // no periods in names
+    return cleanName.replace(" ", ".").toLowerCase() + "@parivedasolutions.com";
 }
 function extractPublicBadge(html) {
     const $p = cheerio.load(html);
@@ -154,6 +155,9 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
         }
         else if (likelyEmail === 'christopher.koechle@parivedasolutions.com') {
             likelyEmail = 'chris.koechle@parivedasolutions.com';
+        }
+        else if (likelyEmail === 'taze.b.miller@parivedasolutions.com') {
+            likelyEmail = 'taze.miller@parivedasolutions.com';
         }
         // make sure the name is very likely to be a Fin
         req.post("https://slack.com/api/users.lookupByEmail", {
