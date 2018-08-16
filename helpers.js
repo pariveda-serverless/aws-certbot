@@ -159,6 +159,9 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
         else if (likelyEmail === 'taze.b.miller@parivedasolutions.com') {
             likelyEmail = 'taze.miller@parivedasolutions.com';
         }
+        else if (likelyEmail === 'salvatore.cotilletta@parivedasolutions.com') {
+            likelyEmail = 'sal.cotilletta@parivedasolutions.com';
+        }
         // make sure the name is very likely to be a Fin
         req.post("https://slack.com/api/users.lookupByEmail", {
             auth: {
