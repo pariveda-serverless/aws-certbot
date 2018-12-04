@@ -10,6 +10,9 @@ phases:
       # Install jq
       - apt-get update && apt-get install -y jq
 
+      # Epsagon plugin
+      - sls plugin install --name serverless-plugin-epsagon
+
   pre_build:
     commands:
       # Get Configuration Information
