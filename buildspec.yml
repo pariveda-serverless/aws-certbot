@@ -31,12 +31,15 @@ phases:
       # For environment var SLACK_BOT_AUTH_TOKEN in serverless.yml
       #- aws s3api get-object --bucket $(cat s3.txt) --key bot_oauth.enc bot_oauth.txt
 
+      # For environment var EPSAGON_TOKEN in serverless.yml
+      - aws s3api get-object --bucket $(cat s3.txt) --key epsagon.enc epsagon.txt
+
       # TODO: If needed, add additional steps
       # EXAMPLE: npm lint, npm test, etc.
   build:
     commands:
       # Deploy Application
-      - serverless deploy --clientSecret "$(cat oauth.txt)" --slackToken "$(cat token.txt)"
+      - serverless deploy --clientSecret "$(cat oauth.txt)" --slackToken "$(cat token.txt)" --epsagonToken "$(cat epsagon.txt)"
 
   post_build:
     commands:
@@ -44,6 +47,7 @@ phases:
       - rm -rf s3.txt
       - rm -rf oauth.txt
       - rm -rf token.txt
+      - rm -rf epsagon.txt
       # Remove pipelines
       # USE WITH EXTREME CAUTION!
       #- sls remove
