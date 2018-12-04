@@ -3,11 +3,15 @@ service: aws-certbot
 
 plugins:
   - serverless-offline
+  - serverless-plugin-epsagon
 
 custom:
   securityHash: ${file(./securityhash.txt)}
   appHash: ${file(./apphash.txt)}
   table: ${env:PIPELINE}.${env:STAGE}
+  epsagon:
+    token: ${opt:epsagonToken}
+    appName: ${env:PIPELINE}-${env:STAGE}
 
 provider:
   name: aws
