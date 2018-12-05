@@ -13,6 +13,9 @@ phases:
       # Epsagon plugin
       - sls plugin install --name serverless-plugin-epsagon
 
+      # Echo sls and node versions
+      - echo Node version is $(node -v)
+      - echo Serverless Framework version is $(sls -v)
   pre_build:
     commands:
       # Get Configuration Information
