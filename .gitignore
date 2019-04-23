@@ -4,3 +4,4 @@ test
 *.sh
 # Serverless framework puts deployment artifacts here:
 .serverless
+secrets/*

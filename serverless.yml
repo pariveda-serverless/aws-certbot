@@ -9,6 +9,7 @@ custom:
   securityHash: ${file(./securityhash.txt)}
   appHash: ${file(./apphash.txt)}
   table: ${env:PIPELINE}.${env:STAGE}
+  emailMappingTable: ${env:PIPELINE}.${env:STAGE}.nameEmailMapping
   epsagon:
     token: ${opt:epsagonToken}
     appName: ${env:PIPELINE}-${env:STAGE}
@@ -89,6 +90,19 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: certKey
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    EmailMappingDynamoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: '${self:custom.emailMappingTable}'
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

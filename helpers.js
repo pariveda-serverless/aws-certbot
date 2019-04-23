@@ -12,10 +12,40 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ];
 
-function nameToEmail(name) {
-    let cleanName = name.replace(".",""); // no periods in names
-    return cleanName.replace(/ /gi, ".").toLowerCase() + "@parivedasolutions.com";
+function nameToEmail(name, callback) {
+    getNameEmailMapping(name, function(err, result) {
+        if (err) {
+            console.log("Error getting name/email mapping: " + err);
+            callback(error);
+        } else {
+            let email = result;
+            if (email == null) {
+                let cleanName = name.replace(".",""); // no periods in names
+                email = cleanName.replace(/ /gi, ".").toLowerCase() + "@parivedasolutions.com";
+            }
+            callback(null, email);
+        }
+    });
 }
+
+function getNameEmailMapping(name, callback) {
+    docs.get({
+        TableName: tableName,
+        Key: {
+            "name": name
+        }
+    }, function(err, data) {
+        let email;
+        if (!err && !Object.keys(data).length) {
+            console.log("Didn't find a name match in DynamoDB");
+        } else if (!err) {
+            console.log("Found a name match in DynamoDB");
+            email = data.Item.email;
+        }
+        callback(err, email);
+    });
+}
+
 function extractPublicBadge(html) {
     const $p = cheerio.load(html);
     let type = $p('.badgeTitleSmall').text().trim();
@@ -131,145 +161,121 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
             message: "junk"
         };
 
-        let likelyEmail = nameToEmail(certDetails.fin);
-        console.log("Email assumed to be: " + likelyEmail);
-        if (likelyEmail === 'shunqian.luo@parivedasolutions.com') {
-            likelyEmail = 'nathan.luo@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'nicholas.ward@parivedasolutions.com') {
-            likelyEmail = 'nick.ward@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'john.price@parivedasolutions.com') {
-            likelyEmail = 'johnny.price@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'david.sulkin@parivedasolutions.com') {
-            likelyEmail = 'dave.sulkin@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'dave.allen@parivedasolutions.com') {
-            likelyEmail = 'david.allen@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'benjamin.abbitt@parivedasolutions.com') {
-            likelyEmail = 'ben.abbitt@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'alexander.lyons@parivedasolutions.com') {
-            likelyEmail = 'alex.lyons@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'christopher.koechle@parivedasolutions.com') {
-            likelyEmail = 'chris.koechle@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'taze.b.miller@parivedasolutions.com') {
-            likelyEmail = 'taze.miller@parivedasolutions.com';
-        }
-        else if (likelyEmail === 'salvatore.cotilletta@parivedasolutions.com') {
-            likelyEmail = 'sal.cotilletta@parivedasolutions.com';
-        }
-        // make sure the name is very likely to be a Fin
-        req.post("https://slack.com/api/users.lookupByEmail", {
-            auth: {
-                bearer: slackToken
-            },
-            form: {
-                token: slackToken,
-                email: likelyEmail,
-            }
-        }, function (error, response, body) {
-            if (error) {
-                console.log("SLACK EMAIL RETRIEVAL ERROR - " + error);
-            } else {
-                // console.log(JSON.stringify(response.body));
-                let profile = JSON.parse(response.body);
-                // console.log(JSON.stringify(profile));
-                if (profile.ok) {
-                    console.log("Looks like a Fin: " + profile.user.real_name);
-                    // Make a couple things more friendly:
-                    let level = "Unknown";
-                    let track = "Unknown";
-                    //let isSA = '0';
-                    if (certDetails.cert === "AWS Certified DevOps Engineer - Professional") {
-                        level = PRO_LEVEL;
-                        track = DEVOPS_TRACK;
+        nameToEmail(certDetails.fin, function(err, result) {
+            if (!error) {
+                let likelyEmail = result;
+                console.log("Email assumed to be: " + likelyEmail);
+                
+                // make sure the name is very likely to be a Fin
+                req.post("https://slack.com/api/users.lookupByEmail", {
+                    auth: {
+                        bearer: slackToken
+                    },
+                    form: {
+                        token: slackToken,
+                        email: likelyEmail,
                     }
-                    else if (certDetails.cert === "AWS Certified Developer - Associate") {
-                        level = ASSOCIATE_LEVEL;
-                        track = DEVOPS_TRACK;
-                    }
-                    else if (certDetails.cert === "AWS Certified SysOps Administrator - Associate") {
-                        level = ASSOCIATE_LEVEL;
-                        track = DEVOPS_TRACK;
-                    }
-                    else if (certDetails.cert === "AWS Certified Solutions Architect - Professional") {
-                        level = PRO_LEVEL;
-                        track = SA_TRACK;
-                    }
-                    else if (certDetails.cert === "AWS Certified Solutions Architect - Associate") {
-                        level = ASSOCIATE_LEVEL;
-                        track = SA_TRACK;
-                    }
-                    else if (certDetails.cert === "AWS Certified Big Data - Specialty") {
-                        level = SPECIALTY_LEVEL;
-                        track = "";
-                    }
-                    else if (certDetails.cert === "AWS Certified Advanced Networking - Specialty") {
-                        level = SPECIALTY_LEVEL;
-                        track = "";
-                    }
-                    else if (certDetails.cert === "AWS Certified Alexa Skill Builder - Specialty") {
-                        level = SPECIALTY_LEVEL;
-                        track = "";
-                    }
-                    else if (certDetails.cert === "AWS Certified Machine Learning - Specialty") {
-                        level = SPECIALTY_LEVEL;
-                        track = "";
-                    }
-                    else if (certDetails.cert === "AWS Certified Security - Specialty") {
-                        level = SPECIALTY_LEVEL;
-                        track = "";
-                    }
+                }, function (error, response, body) {
+                    if (error) {
+                        console.log("SLACK EMAIL RETRIEVAL ERROR - " + error);
+                    } else {
+                        // console.log(JSON.stringify(response.body));
+                        let profile = JSON.parse(response.body);
+                        // console.log(JSON.stringify(profile));
+                        if (profile.ok) {
+                            console.log("Looks like a Fin: " + profile.user.real_name);
+                            // Make a couple things more friendly:
+                            let level = "Unknown";
+                            let track = "Unknown";
+                            //let isSA = '0';
+                            if (certDetails.cert === "AWS Certified DevOps Engineer - Professional") {
+                                level = PRO_LEVEL;
+                                track = DEVOPS_TRACK;
+                            }
+                            else if (certDetails.cert === "AWS Certified Developer - Associate") {
+                                level = ASSOCIATE_LEVEL;
+                                track = DEVOPS_TRACK;
+                            }
+                            else if (certDetails.cert === "AWS Certified SysOps Administrator - Associate") {
+                                level = ASSOCIATE_LEVEL;
+                                track = DEVOPS_TRACK;
+                            }
+                            else if (certDetails.cert === "AWS Certified Solutions Architect - Professional") {
+                                level = PRO_LEVEL;
+                                track = SA_TRACK;
+                            }
+                            else if (certDetails.cert === "AWS Certified Solutions Architect - Associate") {
+                                level = ASSOCIATE_LEVEL;
+                                track = SA_TRACK;
+                            }
+                            else if (certDetails.cert === "AWS Certified Big Data - Specialty") {
+                                level = SPECIALTY_LEVEL;
+                                track = "";
+                            }
+                            else if (certDetails.cert === "AWS Certified Advanced Networking - Specialty") {
+                                level = SPECIALTY_LEVEL;
+                                track = "";
+                            }
+                            else if (certDetails.cert === "AWS Certified Alexa Skill Builder - Specialty") {
+                                level = SPECIALTY_LEVEL;
+                                track = "";
+                            }
+                            else if (certDetails.cert === "AWS Certified Machine Learning - Specialty") {
+                                level = SPECIALTY_LEVEL;
+                                track = "";
+                            }
+                            else if (certDetails.cert === "AWS Certified Security - Specialty") {
+                                level = SPECIALTY_LEVEL;
+                                track = "";
+                            }
 
-                    docs.put({
-                        TableName: tableName,
-                        Item : {
-                            certKey: certId,
-                            timestamp: "" + new Date().getTime().toString(),
-                            //userName: inputParams.user_name,
-                            fin: certDetails.fin,
-                            email: likelyEmail,
-                            slack_user_id_logged_by: slackUserId,
-                            slack_user_id_earned_by: profile.user.id,
-                            // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
-                            // office: slackInfo.profile.fields.Xf1LTXNG6P.value, // Office
-                            cert: certDetails.cert,
-                            level: level,
-                            track: track,
-                            cert_status: certDetails.certStatus,
-                            starts_timestamp: certDetails.starts.unix(),
-                            starts: certDetails.starts.format("MM/DD/YYYY"),
-                            expires_timestamp: certDetails.ends.unix(),
-                            expires: certDetails.ends.format("MM/DD/YYYY"),
-                        }
-                    }, function(err, data) {
-                        if (err) {
-                            console.log("Error saving cert: " + err, null);
+                            docs.put({
+                                TableName: tableName,
+                                Item : {
+                                    certKey: certId,
+                                    timestamp: "" + new Date().getTime().toString(),
+                                    //userName: inputParams.user_name,
+                                    fin: certDetails.fin,
+                                    email: likelyEmail,
+                                    slack_user_id_logged_by: slackUserId,
+                                    slack_user_id_earned_by: profile.user.id,
+                                    // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
+                                    // office: slackInfo.profile.fields.Xf1LTXNG6P.value, // Office
+                                    cert: certDetails.cert,
+                                    level: level,
+                                    track: track,
+                                    cert_status: certDetails.certStatus,
+                                    starts_timestamp: certDetails.starts.unix(),
+                                    starts: certDetails.starts.format("MM/DD/YYYY"),
+                                    expires_timestamp: certDetails.ends.unix(),
+                                    expires: certDetails.ends.format("MM/DD/YYYY"),
+                                }
+                            }, function(err, data) {
+                                if (err) {
+                                    console.log("Error saving cert: " + err, null);
+                                }
+                                else {
+                                    console.log("Cert info saved to DynamoDB");
+                                    certObject.message = ":tada: Congrats, " + certDetails.fin + "! :tada:\nYour '" + certDetails.cert + "' cert is logged, safe and sound. Great work!";
+                                }
+                                callback(null, certObject);
+                            });
+
+                            console.log(JSON.stringify(certObject));
                         }
                         else {
-                            console.log("Cert info saved to DynamoDB");
-                            certObject.message = ":tada: Congrats, " + certDetails.fin + "! :tada:\nYour '" + certDetails.cert + "' cert is logged, safe and sound. Great work!";
+                            certObject.found = false;
+                            certObject.message = "Hmm, that's a valid '" + certDetails.cert + "' cert for " + certDetails.fin + ".\nBut there doesn't seem to be a Fin with email " + likelyEmail + ".\nIf you think this is a mistake, contact #aws-certbot-support";
+                            console.log("Not a Fin: " + likelyEmail);
+                            callback(null, certObject);
+
                         }
-                        callback(null, certObject);
-                    });
 
-                    console.log(JSON.stringify(certObject));
-                }
-                else {
-                    certObject.found = false;
-                    certObject.message = "Hmm, that's a valid '" + certDetails.cert + "' cert for " + certDetails.fin + ".\nBut there doesn't seem to be a Fin with email " + likelyEmail + ".\nIf you think this is a mistake, contact #aws-certbot-support";
-                    console.log("Not a Fin: " + likelyEmail);
-                    callback(null, certObject);
-
-                }
-
+                    }
+                });
             }
         });
+        
     }
 
 }
