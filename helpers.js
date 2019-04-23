@@ -6,6 +6,7 @@ const PRO_LEVEL = "Pro";
 const ASSOCIATE_LEVEL = "Associate";
 const DEVOPS_TRACK = "DevOps";
 const SA_TRACK = "Solutions Architect";
+const SPECIALTY_LEVEL = "Specialty";
 const req = require('request');
 const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -190,10 +191,40 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                     }
                     else if (certDetails.cert === "AWS Certified Developer - Associate") {
                         level = ASSOCIATE_LEVEL;
-                        track = "Both";
+                        track = DEVOPS_TRACK;
                     }
-                    // TODO - add remaining certs
-                    //else if (awsCert === "")
+                    else if (certDetails.cert === "AWS Certified SysOps Administrator - Associate") {
+                        level = ASSOCIATE_LEVEL;
+                        track = DEVOPS_TRACK;
+                    }
+                    else if (certDetails.cert === "AWS Certified Solutions Architect - Professional") {
+                        level = PRO_LEVEL;
+                        track = SA_TRACK;
+                    }
+                    else if (certDetails.cert === "AWS Certified Solutions Architect - Associate") {
+                        level = ASSOCIATE_LEVEL;
+                        track = SA_TRACK;
+                    }
+                    else if (certDetails.cert === "AWS Certified Big Data - Specialty") {
+                        level = SPECIALTY_LEVEL;
+                        track = "";
+                    }
+                    else if (certDetails.cert === "AWS Certified Advanced Networking - Specialty") {
+                        level = SPECIALTY_LEVEL;
+                        track = "";
+                    }
+                    else if (certDetails.cert === "AWS Certified Alexa Skill Builder - Specialty") {
+                        level = SPECIALTY_LEVEL;
+                        track = "";
+                    }
+                    else if (certDetails.cert === "AWS Certified Machine Learning - Specialty") {
+                        level = SPECIALTY_LEVEL;
+                        track = "";
+                    }
+                    else if (certDetails.cert === "AWS Certified Security - Specialty") {
+                        level = SPECIALTY_LEVEL;
+                        track = "";
+                    }
 
                     docs.put({
                         TableName: tableName,
