@@ -32,7 +32,7 @@ function getNameEmailMapping(name, callback) {
     docs.get({
         TableName: tableName,
         Key: {
-            "name": name
+            "fin": name
         }
     }, function(err, data) {
         let email;

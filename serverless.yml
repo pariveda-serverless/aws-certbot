@@ -20,6 +20,7 @@ provider:
   stage: ${opt:stage, env:STAGE}
   environment:
     TABLE: ${self:custom.table}
+    MAPPING_TABLE: ${self:custom.emailMappingTable}
     SERVICE_AND_STAGE: ${env:PIPELINE}
   # NOTE: Codebuild passes the lambda role from the security stack to the serverless deploy command in the live CI/CD pipeline
   role: ${file(./rolearn.txt)}
@@ -72,6 +73,20 @@ functions:
           method: post
           cors: true
 
+  postMapping:
+    environment:
+      VERIFICATION_TOKEN: ${opt:slackToken}
+      SECRETS_BUCKET: ${file(./s3.txt)}
+      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
+      APP_COMMIT_HASH: ${self:custom.appHash}
+    handler: postCert.handler
+    timeout: 60
+    events:
+      - http:
+          path: cert
+          method: post
+          cors: true
+
 resources:
   Resources:
 
@@ -99,10 +114,10 @@ resources:
       Properties:
         TableName: '${self:custom.emailMappingTable}'
         AttributeDefinitions:
-          - AttributeName: name
+          - AttributeName: fin
             AttributeType: S
         KeySchema:
-          - AttributeName: name
+          - AttributeName: fin
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
