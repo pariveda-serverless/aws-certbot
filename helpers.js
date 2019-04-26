@@ -8,12 +8,54 @@ const DEVOPS_TRACK = "DevOps";
 const SA_TRACK = "Solutions Architect";
 const SPECIALTY_LEVEL = "Specialty";
 const req = require('request');
-const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
+const SUPPORTED_CERTS = {
+    "AWS Certified DevOps Engineer - Professional": {
+        level: PRO_LEVEL,
+        track: DEVOPS_TRACK
+    },
+    "AWS Certified Developer - Associate": {
+        level: ASSOCIATE_LEVEL,
+        track: DEVOPS_TRACK
+    },
+    "AWS Certified SysOps Administrator - Associate": {
+        level: ASSOCIATE_LEVEL,
+        track: DEVOPS_TRACK
+    },
+    "AWS Certified Solutions Architect - Professional": {
+        level: PRO_LEVEL,
+        track: SA_TRACK
+    },
+    "AWS Certified Solutions Architect - Associate": {
+        level: ASSOCIATE_LEVEL,
+        track: SA_TRACK
+    },
+    "AWS Certified Big Data - Specialty": {
+        level: SPECIALTY_LEVEL,
+        track: ""
+    },
+    "AWS Certified Advanced Networking - Specialty": {
+        level: SPECIALTY_LEVEL,
+        track: ""
+    },
+    "AWS Certified Alexa Skill Builder - Specialty": {
+        level: SPECIALTY_LEVEL,
+        track: ""
+    },
+    "AWS Certified Machine Learning - Specialty": {
+        level: SPECIALTY_LEVEL,
+        track: ""
+    },
+    "AWS Certified Security - Specialty": {
+        level: SPECIALTY_LEVEL,
+        track: ""
+    }
+};
 
-function nameToEmail(name, callback) {
-    getNameEmailMapping(name, function(err, result) {
+function nameToEmail(name, mappingTableName, callback) {
+    getNameEmailMapping(name, mappingTableName, function(err, result) {
         if (err) {
             console.log("Error getting name/email mapping: " + err);
             callback(error);
@@ -28,7 +70,7 @@ function nameToEmail(name, callback) {
     });
 }
 
-function getNameEmailMapping(name, callback) {
+function getNameEmailMapping(name, tableName, callback) {
     docs.get({
         TableName: tableName,
         Key: {
@@ -59,7 +101,6 @@ function extractPublicBadge(html) {
         let name = "";
         let starts = "";
         let expires = "";
-        console.log('person is ' + name);
         $p('.badgeDetailsItemSmall').each(function(i, elem) {
             if (i === 2) {
                 name = $p(this).text().trim();
@@ -67,7 +108,7 @@ function extractPublicBadge(html) {
             }
             else if (i === 3) {
                 let startsText = $p(this).text().trim().replace(",", "");
-                console.log('jack wth: ' + starts);
+                console.log('starts: ' + startsText);
                 let dateParts = startsText.split(" ");
 
                 //console.log('date is ' + dateParts[0]);
@@ -79,6 +120,7 @@ function extractPublicBadge(html) {
             }
             else if (i === 4) {
                 let expiresText = $p(this).text().trim().replace(",", "");
+                console.log('expires: ' + expiresText);
                 let dateParts = expiresText.split(" ");
 
                 //console.log('date is ' + dateParts[0]);
@@ -89,13 +131,16 @@ function extractPublicBadge(html) {
                 //expires = console.log("earned " + earnedOn.format('MM/DD/YYYY'));
             }
         });
+
+        const certStatus = expires.diff(moment()) > 0 ? "Active" : "Expired"; // diff between expiration date and current date is greater than 0 means an Active cert
+
         return {
             found: true,
             fin: name,
             starts: starts,
             ends: expires,
             cert: type,
-            certStats: 'Active' // TODO - date logic to determine if active
+            certStatus: certStatus
         }
     }
 
@@ -135,7 +180,7 @@ function getNewCertObject(html) {
         }
     }
 }
-function extractListingsFromHTML (html, certId, slackUserId, tableName, slackToken, callback) {
+function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingTableName, slackToken, callback) {
 
     let certDetails = '';
     if (certId.toLowerCase().startsWith('https')) {
@@ -161,8 +206,8 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
             message: "junk"
         };
 
-        nameToEmail(certDetails.fin, function(err, result) {
-            if (!error) {
+        nameToEmail(certDetails.fin, mappingTableName, function(err, result) {
+            if (!err) {
                 let likelyEmail = result;
                 console.log("Email assumed to be: " + likelyEmail);
                 
@@ -188,47 +233,11 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, slackTok
                             let level = "Unknown";
                             let track = "Unknown";
                             //let isSA = '0';
-                            if (certDetails.cert === "AWS Certified DevOps Engineer - Professional") {
-                                level = PRO_LEVEL;
-                                track = DEVOPS_TRACK;
+                            if (SUPPORTED_CERTS[certDetails.cert]) {
+                                level = SUPPORTED_CERTS[certDetails.cert].level;
+                                track = SUPPORTED_CERTS[certDetails.cert].track;
                             }
-                            else if (certDetails.cert === "AWS Certified Developer - Associate") {
-                                level = ASSOCIATE_LEVEL;
-                                track = DEVOPS_TRACK;
-                            }
-                            else if (certDetails.cert === "AWS Certified SysOps Administrator - Associate") {
-                                level = ASSOCIATE_LEVEL;
-                                track = DEVOPS_TRACK;
-                            }
-                            else if (certDetails.cert === "AWS Certified Solutions Architect - Professional") {
-                                level = PRO_LEVEL;
-                                track = SA_TRACK;
-                            }
-                            else if (certDetails.cert === "AWS Certified Solutions Architect - Associate") {
-                                level = ASSOCIATE_LEVEL;
-                                track = SA_TRACK;
-                            }
-                            else if (certDetails.cert === "AWS Certified Big Data - Specialty") {
-                                level = SPECIALTY_LEVEL;
-                                track = "";
-                            }
-                            else if (certDetails.cert === "AWS Certified Advanced Networking - Specialty") {
-                                level = SPECIALTY_LEVEL;
-                                track = "";
-                            }
-                            else if (certDetails.cert === "AWS Certified Alexa Skill Builder - Specialty") {
-                                level = SPECIALTY_LEVEL;
-                                track = "";
-                            }
-                            else if (certDetails.cert === "AWS Certified Machine Learning - Specialty") {
-                                level = SPECIALTY_LEVEL;
-                                track = "";
-                            }
-                            else if (certDetails.cert === "AWS Certified Security - Specialty") {
-                                level = SPECIALTY_LEVEL;
-                                track = "";
-                            }
-
+                            
                             docs.put({
                                 TableName: tableName,
                                 Item : {

@@ -9,7 +9,7 @@ custom:
   securityHash: ${file(./securityhash.txt)}
   appHash: ${file(./apphash.txt)}
   table: ${env:PIPELINE}.${env:STAGE}
-  emailMappingTable: ${env:PIPELINE}.${env:STAGE}.nameEmailMapping
+  emailMappingTable: ${env:PIPELINE}.nameEmailMapping.${env:STAGE}
   epsagon:
     token: ${opt:epsagonToken}
     appName: ${env:PIPELINE}-${env:STAGE}
@@ -79,11 +79,11 @@ functions:
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: postCert.handler
+    handler: postMapping.handler
     timeout: 60
     events:
       - http:
-          path: cert
+          path: mapping
           method: post
           cors: true
 

@@ -3,7 +3,7 @@ const docs = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 const qs = require('querystring');
 const req = require('request');
 const token = process.env['VERIFICATION_TOKEN'];
-const TABLE = process.env['MAPPING_TABLE'];
+const MAPPING_TABLE = process.env['MAPPING_TABLE'];
 
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
@@ -28,7 +28,7 @@ function processEvent(event, context, callback) {
     console.log('email is ' + email);
 
     docs.put({
-        TableName: TABLE,
+        TableName: MAPPING_TABLE,
         Item : {
             timestamp: "" + new Date().getTime().toString(),
             fin: name,
@@ -37,7 +37,7 @@ function processEvent(event, context, callback) {
         }
     }, function(err, data) {
         if (err) {
-            console.log("Error saving mapping: " + err, null);
+            console.log("Error saving mapping: " + err);
         }
         else {
             console.log("Mapping saved to DynamoDB");
@@ -47,7 +47,7 @@ function processEvent(event, context, callback) {
                 uri: responseUrl,
                 method: 'POST',
                 json: {
-                    "response_type": CHANNEL,
+                    "response_type": "in_channel",
                     "text": ":tada: Email mapping for " + name + " (" + email + ") is logged, safe and sound. :smile:"
                 }
             };

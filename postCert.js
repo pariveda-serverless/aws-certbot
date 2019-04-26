@@ -7,6 +7,7 @@ const decryptedSlackAuthToken = process.env['SLACK_APP_AUTH_TOKEN'];
 // See https://api.slack.com/docs/token-types#verification
 const token = process.env['VERIFICATION_TOKEN'];
 const TABLE = process.env['TABLE'];
+const MAPPING_TABLE = process.env['MAPPING_TABLE'];
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
 const {extractListingsFromHTML} = require('./helpers');
@@ -85,7 +86,7 @@ function processEvent(event, context, callback) {
                 options = badgeOptions;
             }
             curl.request(options, function (err, parts) {
-                extractListingsFromHTML(parts, certid, slackUserId, TABLE, decryptedSlackAuthToken, function (err, response) {
+                extractListingsFromHTML(parts, certid, slackUserId, TABLE, MAPPING_TABLE, decryptedSlackAuthToken, function (err, response) {
                     if (err) {
                         console.log("Horrible error: " + err);
                     } else {
