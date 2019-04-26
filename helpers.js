@@ -163,13 +163,13 @@ function getNewCertObject(html) {
         expiration = expiration.replace(",", "");
         let dateParts = expiration.split(" ");
 
-        console.log('date is ' + dateParts[0]);
+        console.log('date is ' + dateParts[0] + ' ' + dateParts[1] + ', ' + dateParts[2]);
         let monthNumber = (monthNames.indexOf(dateParts[0])) + 1;
         let year = dateParts[2];
         let day = dateParts[1];
         let starts = moment(year + '-' + monthNumber + '-' + day, 'YYYY-MM-DD');
         //console.log(starts);
-        let ends = starts.clone().add(2, 'year').add(1, 'day');
+        let ends = starts.clone().add(3, 'year').add(1, 'day');
         return {
             found: true,
             fin: name,
