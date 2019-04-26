@@ -87,6 +87,18 @@ functions:
           method: post
           cors: true
 
+  sendReminders:
+    environment:
+      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
+      SECRETS_BUCKET: ${file(./s3.txt)}
+      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
+      APP_COMMIT_HASH: ${self:custom.appHash}
+      REMINDER_DAYS: 90
+    handler: sendReminders.handler
+    timeout: 60
+    events:
+      - schedule: cron(0 17 * * ? *)
+
 resources:
   Resources:
 
