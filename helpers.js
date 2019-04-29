@@ -176,7 +176,7 @@ function getNewCertObject(html) {
             starts: starts,
             ends: ends,
             cert: awsCert,
-            certStats: certStatus
+            certStatus: certStatus
         }
     }
 }
