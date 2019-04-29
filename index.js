@@ -42,7 +42,7 @@ function processEvent(event, context, callback) {
         Payload: JSON.stringify(event)
     };
     console.log('params:' + JSON.stringify(params));
-    let slackValues = inputParams.text.split('%2C');
+    let slackValues = inputParams.text.split(',');
 
     let certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
 

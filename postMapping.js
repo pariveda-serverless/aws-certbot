@@ -5,6 +5,9 @@ const req = require('request');
 const token = process.env['VERIFICATION_TOKEN'];
 const MAPPING_TABLE = process.env['MAPPING_TABLE'];
 
+const EPHEMERAL = "ephemeral";
+const CHANNEL = "in_channel";
+
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
 
@@ -20,7 +23,7 @@ function processEvent(event, context, callback) {
         context.fail("Invalid request token");
     }
 
-    let slackValues = inputParams.text.split('%2C');
+    let slackValues = inputParams.text.split(',');
 
     let name = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     let email = (slackValues[1] !== null ? slackValues[1].toString() : "").trim();
@@ -47,7 +50,7 @@ function processEvent(event, context, callback) {
                 uri: responseUrl,
                 method: 'POST',
                 json: {
-                    "response_type": "in_channel",
+                    "response_type": CHANNEL,
                     "text": ":tada: Email mapping for " + name + " (" + email + ") is logged, safe and sound. :smile:"
                 }
             };
@@ -63,6 +66,16 @@ function processEvent(event, context, callback) {
             });
         }
     });
+
+    const savingMessage = {
+        "response_type": EPHEMERAL,
+        "text": "Saving name/email mapping..."
+    };
+    const doingWorkMessage = {
+        statusCode: 200,
+        body: JSON.stringify(savingMessage)
+    };
+    callback(null, doingWorkMessage)
 }
 
 exports.handler = (event, context, callback) => {
