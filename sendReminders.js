@@ -21,8 +21,11 @@ function processEvent(event, context, callback) {
 
         var params = {
             TableName : TABLE,
-            FilterExpression : 'expires_timestamp = :notification_day_timestamp',
-            ExpressionAttributeValues : {':notification_day_timestamp' : reminderDayTimestamp}
+            FilterExpression : 'expires_timestamp = :notification_day_timestamp and fin_active = :active',
+            ExpressionAttributeValues : {
+                ':active': 1,
+                ':notification_day_timestamp' : reminderDayTimestamp
+            }
         };
         docs.scan(params, function(err, data) {
         if (err) {

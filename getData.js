@@ -49,7 +49,9 @@ function processEvent(event, context, callback) {
 
     const fields = ['certKey', 'cert', 'fin', 'email', 'level', 'track', 'expires'];
     var params = {
-        TableName : process.env.TABLE
+        TableName : process.env.TABLE,
+        FilterExpression : 'fin_active = :active',
+        ExpressionAttributeValues : { ':active': 1 }
     };
 
     docs.scan(params, function(err, data) {

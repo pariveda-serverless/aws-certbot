@@ -51,7 +51,7 @@ functions:
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
     handler: postCert.handler
-    timeout: 60
+    timeout: 30
     events:
       - http:
           path: cert
@@ -66,7 +66,7 @@ functions:
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
     handler: getData.handler
-    timeout: 60
+    timeout: 30
     events:
       - http:
           path: awsCertData
@@ -80,7 +80,7 @@ functions:
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
     handler: postMapping.handler
-    timeout: 60
+    timeout: 30
     events:
       - http:
           path: mapping
@@ -98,6 +98,17 @@ functions:
     timeout: 60
     events:
       - schedule: cron(0 17 * * ? *)
+
+  deactivateFins:
+    environment:
+      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
+      SECRETS_BUCKET: ${file(./s3.txt)}
+      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
+      APP_COMMIT_HASH: ${self:custom.appHash}
+    handler: deactivateFins.handler
+    timeout: 60
+    events:
+      - schedule: cron(0 5 * * ? *)
 
 resources:
   Resources:
