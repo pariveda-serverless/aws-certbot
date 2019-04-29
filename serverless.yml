@@ -9,7 +9,7 @@ custom:
   securityHash: ${file(./securityhash.txt)}
   appHash: ${file(./apphash.txt)}
   table: ${env:PIPELINE}.${env:STAGE}
-  emailMappingTable: ${env:PIPELINE}.nameEmailMapping.${env:STAGE}
+  emailMappingTable: ${env:PIPELINE}.nameEmailMapping
   epsagon:
     token: ${opt:epsagonToken}
     appName: ${env:PIPELINE}-${env:STAGE}
