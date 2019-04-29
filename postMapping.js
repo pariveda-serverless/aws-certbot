@@ -39,41 +39,37 @@ function processEvent(event, context, callback) {
             slack_user_id_logged_by: slackUserId
         }
     }, function(err, data) {
+        let options = {
+            uri: responseUrl,
+            method: 'POST',
+            json: {
+                "response_type": CHANNEL,
+                "text": ""
+            }
+        };
         if (err) {
             console.log("Error saving mapping: " + err);
+            options.json.text = ":grimacing: There was an error saving the email mapping, please try again later. :disappointed:";
         }
         else {
-            console.log("Mapping saved to DynamoDB");
-
             // save successful
-            let options = {
-                uri: responseUrl,
-                method: 'POST',
-                json: {
-                    "response_type": CHANNEL,
-                    "text": ":tada: Email mapping for " + name + " (" + email + ") is logged, safe and sound. :smile:"
-                }
-            };
-            console.log("responds with: " + JSON.stringify(options));
-            req(options, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    console.log("great success!") // Print the shortened url.
-                }
-                else {
-                    console.log("Error responding to slack at: " + responseUrl);
-                    console.log("Has the URL been used more than 5 times or is older than 30 minutes?");
-                }
-            });
+            console.log("Mapping saved to DynamoDB");
+            options.json.text = ":tada: Email mapping for " + name + " (" + email + ") is logged, safe and sound. :smile:";
         }
+        console.log("responds with: " + JSON.stringify(options));
+        req(options, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                console.log("great success!") // Print the shortened url.
+            }
+            else {
+                console.log("Error responding to slack at: " + responseUrl);
+                console.log("Has the URL been used more than 5 times or is older than 30 minutes?");
+            }
+        });
     });
 
-    const savingMessage = {
-        "response_type": EPHEMERAL,
-        "text": "Saving name/email mapping..."
-    };
     const doingWorkMessage = {
         statusCode: 200,
-        body: JSON.stringify(savingMessage)
     };
     callback(null, doingWorkMessage)
 }
