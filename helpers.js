@@ -211,16 +211,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
                 let likelyEmail = result;
                 console.log("Email assumed to be: " + likelyEmail);
                 
-                // make sure the name is very likely to be a Fin
-                req.post("https://slack.com/api/users.lookupByEmail", {
-                    auth: {
-                        bearer: slackToken
-                    },
-                    form: {
-                        token: slackToken,
-                        email: likelyEmail,
-                    }
-                }, function (error, response, body) {
+                getSlackProfileByEmail(likelyEmail, slackToken, function (error, response, body) {
                     if (error) {
                         console.log("SLACK EMAIL RETRIEVAL ERROR - " + error);
                     } else {
@@ -258,6 +249,7 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
                                     starts: certDetails.starts.format("MM/DD/YYYY"),
                                     expires_timestamp: certDetails.ends.unix(),
                                     expires: certDetails.ends.format("MM/DD/YYYY"),
+                                    fin_active: 1
                                 }
                             }, function(err, data) {
                                 if (err) {
@@ -289,6 +281,20 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
 
 }
 
+function getSlackProfileByEmail(email, slackToken, callback) {
+    // make sure the name is very likely to be a Fin
+    req.post("https://slack.com/api/users.lookupByEmail", {
+        auth: {
+            bearer: slackToken
+        },
+        form: {
+            token: slackToken,
+            email: email,
+        }
+    }, callback);
+}
+
 module.exports = {
-    extractListingsFromHTML
+    extractListingsFromHTML,
+    getSlackProfileByEmail
 };
