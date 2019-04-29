@@ -28,7 +28,7 @@ function processEvent(event, context, callback) {
         context.fail("Invalid request token");
     }
 
-    let slackValues = inputParams.text.split('%2C');
+    let slackValues = inputParams.text.split(',');
 
     let certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     console.log('cert id is ' + certid);

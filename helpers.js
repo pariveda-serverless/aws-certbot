@@ -34,23 +34,23 @@ const SUPPORTED_CERTS = {
     },
     "AWS Certified Big Data - Specialty": {
         level: SPECIALTY_LEVEL,
-        track: ""
+        track: "Big Data"
     },
     "AWS Certified Advanced Networking - Specialty": {
         level: SPECIALTY_LEVEL,
-        track: ""
+        track: "Advanced Networking"
     },
     "AWS Certified Alexa Skill Builder - Specialty": {
         level: SPECIALTY_LEVEL,
-        track: ""
+        track: "Alexa Skill Builder"
     },
     "AWS Certified Machine Learning - Specialty": {
         level: SPECIALTY_LEVEL,
-        track: ""
+        track: "Machine Learning"
     },
     "AWS Certified Security - Specialty": {
         level: SPECIALTY_LEVEL,
-        track: ""
+        track: "Security"
     }
 };
 
