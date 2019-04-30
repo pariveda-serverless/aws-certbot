@@ -13,6 +13,12 @@ custom:
   epsagon:
     token: ${opt:epsagonToken}
     appName: ${env:PIPELINE}-${env:STAGE}
+  officeSlackCustomFieldId:
+    # dev: Xf1LTXNG6P
+    master: Xf1LTXNG6P
+  cohortSlackCustomFieldId:
+    # dev: Xf1M339XQX
+    master: Xf1M339XQX
 
 provider:
   name: aws
@@ -22,6 +28,14 @@ provider:
     TABLE: ${self:custom.table}
     MAPPING_TABLE: ${self:custom.emailMappingTable}
     SERVICE_AND_STAGE: ${env:PIPELINE}
+    GET_SLACK_PROFILE_SERVICE_URL:
+      Fn::Join:
+        - ""
+        - - "https://"
+          - Ref: "ApiGatewayRestApi"
+          - ".execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/slack/profile"
+    OFFICE_SLACK_CUSTOM_FIELD_ID: ${self:custom.officeSlackCustomFieldId.${self:provider.stage}}
+    COHORT_SLACK_CUSTOM_FIELD_ID: ${self:custom.cohortSlackCustomFieldId.${self:provider.stage}}
   # NOTE: Codebuild passes the lambda role from the security stack to the serverless deploy command in the live CI/CD pipeline
   role: ${file(./rolearn.txt)}
   region: ${env:AWS_REGION}
@@ -36,7 +50,7 @@ functions:
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: index.hello
+    handler: functions/index.hello
     events:
       - http:
           path: hello/world
@@ -45,12 +59,11 @@ functions:
 
   postCert:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
       VERIFICATION_TOKEN: ${opt:slackToken}
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: postCert.handler
+    handler: functions/postCert.handler
     timeout: 30
     events:
       - http:
@@ -65,7 +78,7 @@ functions:
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: getData.handler
+    handler: functions/getData.handler
     timeout: 30
     events:
       - http:
@@ -79,7 +92,7 @@ functions:
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: postMapping.handler
+    handler: functions/postMapping.handler
     timeout: 30
     events:
       - http:
@@ -94,21 +107,35 @@ functions:
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
       REMINDER_DAYS: 90
-    handler: sendReminders.handler
+    handler: functions/sendReminders.handler
     timeout: 60
     events:
       - schedule: cron(0 17 * * ? *)
 
-  deactivateFins:
+  updateFins:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
       SECRETS_BUCKET: ${file(./s3.txt)}
       SECURITY_COMMIT_HASH: ${self:custom.securityHash}
       APP_COMMIT_HASH: ${self:custom.appHash}
-    handler: deactivateFins.handler
+    handler: functions/updateFins.handler
     timeout: 60
     events:
       - schedule: cron(0 5 * * ? *)
+
+  getSlackProfileService:
+    environment:
+      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
+      SLACK_APP_USER_AUTH_TOKEN: ${opt:clientSecret_user}
+      SECRETS_BUCKET: ${file(./s3.txt)}
+      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
+      APP_COMMIT_HASH: ${self:custom.appHash}
+    handler: functions/getSlackProfileService.handler
+    timeout: 30
+    events:
+      - http:
+          path: slack/profile
+          method: get
+          cors: true
 
 resources:
   Resources:
