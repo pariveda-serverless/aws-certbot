@@ -70,7 +70,6 @@ function processEvent(event, context, callback) {
 
                         if (needsUpdate) {
                             updateParams.UpdateExpression = updateParams.UpdateExpression.replace(/,\s*$/, "");
-                            console.log(JSON.stringify(updateParams));
                             docs.update(updateParams, function(err, data) {
                                 if (err) {
                                     console.log("Error updating cert: " + err, null);
