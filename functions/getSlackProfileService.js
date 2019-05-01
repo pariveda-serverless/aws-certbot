@@ -49,7 +49,7 @@ function processEvent(event, context, callback) {
                         }
                     }, function (profileError, profileResponse, profileBody) {
                         if (profileError) {
-                            const errorMessage = "SLACK PROFILE RETRIEVAL ERROR - " + error;
+                            const errorMessage = "SLACK PROFILE RETRIEVAL ERROR - " + profileError;
                             console.log("Error message:" + errorMessage);
                             callback(null, {
                                 statusCode: 500,
