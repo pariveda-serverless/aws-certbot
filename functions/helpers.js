@@ -1,13 +1,13 @@
 const AWS = require('aws-sdk');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const req = require('request');
 const docs = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 const PRO_LEVEL = "Pro";
 const ASSOCIATE_LEVEL = "Associate";
 const DEVOPS_TRACK = "DevOps";
 const SA_TRACK = "Solutions Architect";
 const SPECIALTY_LEVEL = "Specialty";
-const req = require('request');
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
@@ -180,7 +180,7 @@ function getNewCertObject(html) {
         }
     }
 }
-function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingTableName, slackToken, callback) {
+function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingTableName, getSlackProfileServiceBaseUrl, officeSlackCustomFieldId, cohortSlackCustomFieldId, callback) {
 
     let certDetails = '';
     if (certId.toLowerCase().startsWith('https')) {
@@ -210,10 +210,11 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
             if (!err) {
                 let likelyEmail = result;
                 console.log("Email assumed to be: " + likelyEmail);
-                
-                getSlackProfileByEmail(likelyEmail, slackToken, function (error, response, body) {
+
+                const fullGetSlackProfileServiceUrl = getSlackProfileServiceBaseUrl + "?email=" + likelyEmail;
+                req.get(fullGetSlackProfileServiceUrl, function (error, response) {
                     if (error) {
-                        console.log("SLACK EMAIL RETRIEVAL ERROR - " + error);
+                        callback("SLACK PROFILE RETRIEVAL ERROR - " + error, null);
                     } else {
                         // console.log(JSON.stringify(response.body));
                         let profile = JSON.parse(response.body);
@@ -229,28 +230,32 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
                                 track = SUPPORTED_CERTS[certDetails.cert].track;
                             }
                             
+                            const item = {
+                                certKey: certId,
+                                timestamp: "" + new Date().getTime().toString(),
+                                //userName: inputParams.user_name,
+                                fin: certDetails.fin,
+                                email: likelyEmail,
+                                slack_user_id_logged_by: slackUserId,
+                                slack_user_id_earned_by: profile.user.id,
+                                // cohort: profile.user.profile.fields.Xf1M339XQX.value, // Cohort
+                                // office: profile.user.profile.fields.Xf1LTXNG6P.value, // Office
+                                cert: certDetails.cert,
+                                level: level,
+                                track: track,
+                                cert_status: certDetails.certStatus,
+                                starts_timestamp: certDetails.starts.unix(),
+                                starts: certDetails.starts.format("MM/DD/YYYY"),
+                                expires_timestamp: certDetails.ends.unix(),
+                                expires: certDetails.ends.format("MM/DD/YYYY"),
+                                fin_active: 1
+                            };
+                            if (officeSlackCustomFieldId) item.office = profile.user.profile.fields[officeSlackCustomFieldId].value;
+                            if (cohortSlackCustomFieldId) item.cohort = profile.user.profile.fields[cohortSlackCustomFieldId].value;
+
                             docs.put({
                                 TableName: tableName,
-                                Item : {
-                                    certKey: certId,
-                                    timestamp: "" + new Date().getTime().toString(),
-                                    //userName: inputParams.user_name,
-                                    fin: certDetails.fin,
-                                    email: likelyEmail,
-                                    slack_user_id_logged_by: slackUserId,
-                                    slack_user_id_earned_by: profile.user.id,
-                                    // level: slackInfo.profile.fields.Xf1M339XQX.value, // Level
-                                    // office: slackInfo.profile.fields.Xf1LTXNG6P.value, // Office
-                                    cert: certDetails.cert,
-                                    level: level,
-                                    track: track,
-                                    cert_status: certDetails.certStatus,
-                                    starts_timestamp: certDetails.starts.unix(),
-                                    starts: certDetails.starts.format("MM/DD/YYYY"),
-                                    expires_timestamp: certDetails.ends.unix(),
-                                    expires: certDetails.ends.format("MM/DD/YYYY"),
-                                    fin_active: 1
-                                }
+                                Item: item
                             }, function(err, data) {
                                 if (err) {
                                     console.log("Error saving cert: " + err, null);
@@ -269,7 +274,6 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
                             certObject.message = "Hmm, that's a valid '" + certDetails.cert + "' cert for " + certDetails.fin + ".\nBut there doesn't seem to be a Fin with email " + likelyEmail + ".\nIf you think this is a mistake, contact #aws-certbot-support";
                             console.log("Not a Fin: " + likelyEmail);
                             callback(null, certObject);
-
                         }
 
                     }
@@ -281,20 +285,6 @@ function extractListingsFromHTML (html, certId, slackUserId, tableName, mappingT
 
 }
 
-function getSlackProfileByEmail(email, slackToken, callback) {
-    // make sure the name is very likely to be a Fin
-    req.post("https://slack.com/api/users.lookupByEmail", {
-        auth: {
-            bearer: slackToken
-        },
-        form: {
-            token: slackToken,
-            email: email,
-        }
-    }, callback);
-}
-
 module.exports = {
-    extractListingsFromHTML,
-    getSlackProfileByEmail
+    extractListingsFromHTML
 };
