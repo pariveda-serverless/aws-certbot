@@ -36,9 +36,10 @@ function processEvent(event, context, callback) {
                 const name = lookup.user.real_name;
                 console.log("Email found, belongs to " + name);
 
-                const slackId = lookup.user.id;
-
                 if (OFFICE_SLACK_CUSTOM_FIELD_ID || COHORT_SLACK_CUSTOM_FIELD_ID) {
+                    const slackId = lookup.user.id;
+                    console.log("Getting profile custom fields for user ID " + slackId + "...");
+                    
                     req.post("https://slack.com/api/users.profile.get", {
                         auth: {
                             bearer: decryptedSlackUserAuthToken

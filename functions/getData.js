@@ -47,7 +47,7 @@ function processEvent(event, context, callback) {
 
     var slackValues = inputParams.text;
 
-    const fields = ['certKey', 'cert', 'fin', 'email', 'level', 'track', 'expires'];
+    const fields = ['certKey', 'cert', 'fin', 'email', 'office', 'cohort', 'level', 'track', 'expires'];
     var params = {
         TableName : process.env.TABLE,
         FilterExpression : 'fin_active = :active',
