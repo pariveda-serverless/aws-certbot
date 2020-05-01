@@ -1,33 +1,29 @@
 # NOTE: Service name must match the repository name, but replace all '.' with '-' (this is a restriction of Cloudformation naming conventions)
 service: aws-certbot
 
-plugins:
-  - serverless-offline
-  - serverless-plugin-epsagon
-
 custom:
-  securityHash: ${file(./securityhash.txt)}
-  appHash: ${file(./apphash.txt)}
-  table: ${env:PIPELINE}.${env:STAGE}
-  emailMappingTable: ${env:PIPELINE}.nameEmailMapping
-  epsagon:
-    token: ${opt:epsagonToken}
-    appName: ${env:PIPELINE}-${env:STAGE}
+  stage: ${opt:stage}
+  region: ${opt:region}
+  table: ${self:service}.${self:custom.stage}
+  emailMappingTable: ${self:service}.nameEmailMapping
   officeSlackCustomFieldId:
-    # dev: Xf1LTXNG6P
+    dev: Xf1LTXNG6P
     master: Xf1LTXNG6P
   cohortSlackCustomFieldId:
-    # dev: Xf1M339XQX
+    dev: Xf1M339XQX
     master: Xf1M339XQX
+  clientSecret: xoxb-149685676326-618359348662-E5cgXkkRClUUR7Lf5HbtXXRr
+  clientSecret_user: xoxp-149685676326-604707647410-609851737281-df95205a2da44f63d5492c4c9e3548e5
+  slackToken: PwS7X21qRovjuYJcwXuFEV2V
 
 provider:
   name: aws
-  runtime: nodejs6.10
-  stage: ${opt:stage, env:STAGE}
+  runtime: nodejs12.x
+  stage: ${self:custom.stage}
   environment:
     TABLE: ${self:custom.table}
     MAPPING_TABLE: ${self:custom.emailMappingTable}
-    SERVICE_AND_STAGE: ${env:PIPELINE}
+    SERVICE_AND_STAGE: ${self:service}
     GET_SLACK_PROFILE_SERVICE_URL:
       Fn::Join:
         - ""
@@ -37,19 +33,58 @@ provider:
     OFFICE_SLACK_CUSTOM_FIELD_ID: ${self:custom.officeSlackCustomFieldId.${self:provider.stage}}
     COHORT_SLACK_CUSTOM_FIELD_ID: ${self:custom.cohortSlackCustomFieldId.${self:provider.stage}}
   # NOTE: Codebuild passes the lambda role from the security stack to the serverless deploy command in the live CI/CD pipeline
-  role: ${file(./rolearn.txt)}
-  region: ${env:AWS_REGION}
+  region: ${self:custom.region}
   stackTags:
     Type: service
+  iamRoleStatements: # permissions for all of functions
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+      Resource: 
+        - Fn::GetAtt:
+          - DynamoTable
+          - Arn
+        - Fn::GetAtt:
+          - EmailMappingDynamoTable
+          - Arn
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+        - logs:DescribeLogStreams
+      Resource:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:logs:'
+            - Ref: AWS::Region
+            - ':*:*'
+    - Effect: Allow
+      Action:
+        - lambda:InvokeAsync
+        - lambda:InvokeFunction
+      Resource:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:lambda:'
+          - Ref: AWS::Region
+          - ':'
+          - Ref: AWS::AccountId
+          - ':function:'
+          - ${self:service}
+          - '-'
+          - ${self:provider.stage}
+          - '-*'
 
 functions:
   hello:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
-      VERIFICATION_TOKEN: ${opt:slackToken}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      SLACK_APP_AUTH_TOKEN: ${self:custom.clientSecret}
+      VERIFICATION_TOKEN: ${self:custom.slackToken}
     handler: functions/index.hello
     events:
       - http:
@@ -59,10 +94,7 @@ functions:
 
   postCert:
     environment:
-      VERIFICATION_TOKEN: ${opt:slackToken}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      VERIFICATION_TOKEN: ${self:custom.slackToken}
     handler: functions/postCert.handler
     timeout: 30
     events:
@@ -73,11 +105,8 @@ functions:
 
   getData:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
-      VERIFICATION_TOKEN: ${opt:slackToken}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      SLACK_APP_AUTH_TOKEN: ${self:custom.clientSecret}
+      VERIFICATION_TOKEN: ${self:custom.slackToken}
     handler: functions/getData.handler
     timeout: 30
     events:
@@ -88,10 +117,7 @@ functions:
 
   postMapping:
     environment:
-      VERIFICATION_TOKEN: ${opt:slackToken}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      VERIFICATION_TOKEN: ${self:custom.slackToken}
     handler: functions/postMapping.handler
     timeout: 30
     events:
@@ -102,10 +128,7 @@ functions:
 
   sendReminders:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      SLACK_APP_AUTH_TOKEN: ${self:custom.clientSecret}
       REMINDER_DAYS: 90
     handler: functions/sendReminders.handler
     timeout: 60
@@ -114,9 +137,6 @@ functions:
 
   updateFins:
     environment:
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
     handler: functions/updateFins.handler
     timeout: 60
     events:
@@ -124,11 +144,8 @@ functions:
 
   getSlackProfileService:
     environment:
-      SLACK_APP_AUTH_TOKEN: ${opt:clientSecret}
-      SLACK_APP_USER_AUTH_TOKEN: ${opt:clientSecret_user}
-      SECRETS_BUCKET: ${file(./s3.txt)}
-      SECURITY_COMMIT_HASH: ${self:custom.securityHash}
-      APP_COMMIT_HASH: ${self:custom.appHash}
+      SLACK_APP_AUTH_TOKEN: ${self:custom.clientSecret}
+      SLACK_APP_USER_AUTH_TOKEN: ${self:custom.clientSecret_user}
     handler: functions/getSlackProfileService.handler
     timeout: 30
     events:

@@ -13,7 +13,6 @@ const MAPPING_TABLE = process.env['MAPPING_TABLE'];
 const EPHEMERAL = "ephemeral";
 const CHANNEL = "in_channel";
 const {extractListingsFromHTML} = require('./helpers');
-const curl = require('curlrequest');
 
 function processEvent(event, context, callback) {
     console.log(JSON.stringify(event, null, '  '));
@@ -34,11 +33,10 @@ function processEvent(event, context, callback) {
 
     let certid = (slackValues[0] !== null ? slackValues[0].toString() : "").trim();
     console.log('cert id is ' + certid);
-    // Nice and ugly info for the curl request, retrieved by running a real request in the browser
+    // Nice and ugly info for the fetch request, retrieved by running a real request in the browser
     let options = {
-        url: certificationUrl,
+        uri: certificationUrl,
         method: 'POST',
-        compressed: true,
         headers: {
             'cookie': '_ga=GA1.2.24170448.1556137095; ASP.NET_SessionId=eglv3elmeuf0jb2owzheh54x; _gid=GA1.2.835676646.1556310023; _gat=1',
             'accept-language': 'en-US,en;q=0.9',
@@ -53,7 +51,7 @@ function processEvent(event, context, callback) {
             'pragma': 'no-cache',
             'authority': 'aw.certmetrics.com'
         },
-        data: {
+        json: {
             __EVENTTARGET: '',
             __EVENTARGUMENT: '',
             DES_Group: '',
@@ -65,18 +63,17 @@ function processEvent(event, context, callback) {
             ctl00$ctl02$cbxCulture: '?language=en',
             ctl00$mainContent$txtVerificationCode: certid,
             ctl00$mainContent$btnSubmit: 'Submit'
-        },
-        include: false
-    };
-    let badgeOptions = {
-        url: certid,
-        method: 'GET',
+        }
     };
     if (certid.toLowerCase().startsWith('https://')) {
-        options = badgeOptions;
+        options = {
+            uri: certid,
+            method: 'GET',
+        };
     }
-    curl.request(options, function (err, parts) {
-        extractListingsFromHTML(parts, certid, slackUserId, TABLE, MAPPING_TABLE, GET_SLACK_PROFILE_SERVICE_URL, OFFICE_SLACK_CUSTOM_FIELD_ID, COHORT_SLACK_CUSTOM_FIELD_ID, function (err, response) {
+    console.log("Parse responds with: " + JSON.stringify(options));
+    req(options, function (error, response, body) {
+        extractListingsFromHTML(body, certid, slackUserId, TABLE, MAPPING_TABLE, GET_SLACK_PROFILE_SERVICE_URL, OFFICE_SLACK_CUSTOM_FIELD_ID, COHORT_SLACK_CUSTOM_FIELD_ID, function (err, response) {
             if (err) {
                 console.log("Horrible error: " + err);
             } else {
@@ -105,7 +102,6 @@ function processEvent(event, context, callback) {
                 });
             }
         });
-
     });
 }
 
