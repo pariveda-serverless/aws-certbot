@@ -9,7 +9,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "aws-sdk": "latest",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.2",
     "epsagon": "^1.4.0",
     "json2csv": "^3.7.3",
