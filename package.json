@@ -15,7 +15,7 @@
     "json2csv": "^3.7.3",
     "lambda-log-timer": "*",
     "lambda-log-wrapper": "*",
-    "moment": "^2.22.0",
+    "moment": "^2.29.4",
     "pg": "^7.5.0",
     "pg-pool": "^2.0.3",
     "querystring": "^0.2.0",
