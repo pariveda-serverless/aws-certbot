@@ -12,7 +12,7 @@
     "axios": "^0.18.1",
     "cheerio": "^1.0.0-rc.2",
     "epsagon": "^1.4.0",
-    "json2csv": "^3.7.3",
+    "json2csv": "^5.0.7",
     "lambda-log-timer": "*",
     "lambda-log-wrapper": "*",
     "moment": "^2.22.0",
